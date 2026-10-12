@@ -140,11 +140,19 @@ static const char kCollapseCss[] =
     // clone of this same markup parked on document.body. The clone has the tag
     // taken off it, which would otherwise be all this rule needs to hide it.
     //
+    // Claimed is either tag: this bar is the notice, or the strip looked at it
+    // and it is not. That second tag is what keeps the rule from hiding some
+    // other bar indefinitely — a connection warning with nothing to click, say,
+    // which tagBanner() refuses and would otherwise never claim. Nothing stays
+    // hidden longer than the tick that looks at it. The tag is written only
+    // while the bar holds something, so it goes when the bar is emptied and
+    // cannot be the stale mark the paragraph above rules out.
+    //
     // The name unquoted, which CSS allows for a value that is a plain
     // identifier: this stylesheet is handed to the page inside a JavaScript
     // string, where a quote of its own would arrive escaped.
     "#side [data-testid=chat-butterbar]:has(*):not([data-whatly-banner])"
-    "{display:none!important}"
+    ":not([data-whatly-passed]){display:none!important}"
     "[data-whatly-banner]{overflow:hidden!important;display:flex!important;"
     "align-items:center!important;justify-content:center!important;"
     "gap:0!important;padding-left:0!important;padding-right:0!important}"
@@ -438,6 +446,18 @@ static const char kScriptTemplate[] = R"JS(
       });
       if (isNotice && !note.hasAttribute('data-whatly-banner'))
         note.setAttribute('data-whatly-banner', '1');
+      // Every other bar in that slot is let through, so the stylesheet holds
+      // one back only until this pass has looked at it. Marked only while it
+      // holds something, because the spent shell is refilled where it sits: a
+      // mark that outlived the emptying would be on the bar already when the
+      // next notice arrives, which is the one moment it must not be.
+      side.querySelectorAll('[data-testid="chat-butterbar"]')
+          .forEach(function (e) {
+            var pass = !(isNotice && e === note) && !!e.firstElementChild;
+            if (pass === e.hasAttribute('data-whatly-passed')) return;
+            if (pass) e.setAttribute('data-whatly-passed', '1');
+            else e.removeAttribute('data-whatly-passed');
+          });
     };
 
     // Find every column the pane occupies and mark it, so the stylesheet has

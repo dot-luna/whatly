@@ -1243,10 +1243,19 @@ private slots:
     // never becomes a phantom cell. Scoped inside #side so it cannot reach the
     // preview, which is this markup cloned onto document.body with the tag
     // removed. Unquoted, because the CSS travels inside a JavaScript string.
+    // Held back only until it has been looked at: tagBanner() claims the notice
+    // with one tag and every other bar it refuses with the other, so a bar this
+    // handling is not for — a warning with nothing to click, say — is hidden for
+    // a tick and not for as long as the list stays collapsed.
     QVERIFY(on.contains(QLatin1String(
         "#side [data-testid=chat-butterbar]:has(*):not([data-whatly-banner])"
-        "{display:none!important}")));
+        ":not([data-whatly-passed]){display:none!important}")));
     QVERIFY(!on.contains(QLatin1String("data-whatly-seen")));
+    // The second tag goes on while the bar holds something and comes off when
+    // it does not, so the emptied shell carries nothing into its next filling.
+    QVERIFY(on.contains(QLatin1String(
+        "var pass = !(isNotice && e === note) && !!e.firstElementChild;")));
+    QVERIFY(on.contains(QLatin1String("e.removeAttribute('data-whatly-passed')")));
     // The sentences sit as bare text inside the bar, where no selector reaches
     // them, so they go by font-size on whatever holds them.
     QVERIFY(on.contains(QLatin1String("font-size:0!important")));
