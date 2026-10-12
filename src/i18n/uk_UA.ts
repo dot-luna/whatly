@@ -211,17 +211,17 @@ Do you wish to override the security check and continue ?   </source>
 <context>
     <name>ChatListStrip</name>
     <message>
-        <location filename="../chatliststrip.cpp" line="866"/>
+        <location filename="../chatliststrip.cpp" line="1029"/>
         <source>Small</source>
         <translation>Малий</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="868"/>
+        <location filename="../chatliststrip.cpp" line="1031"/>
         <source>Medium</source>
         <translation>Середній</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="870"/>
+        <location filename="../chatliststrip.cpp" line="1033"/>
         <source>Large</source>
         <translation>Великий</translation>
     </message>
@@ -676,7 +676,7 @@ WebEngine не ініціалізовано.</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1229"/>
         <location filename="../mainwindow.cpp" line="1970"/>
-        <location filename="../mainwindow_webengine.cpp" line="1731"/>
+        <location filename="../mainwindow_webengine.cpp" line="1758"/>
         <source>Whatly is locked. Unlock it to send messages.</source>
         <translation>Whatly заблоковано. Розблокуйте його, щоб надсилати повідомлення.</translation>
     </message>
@@ -1186,13 +1186,13 @@ Open Settings now?</source>
     </message>
     <message>
         <location filename="../mainwindow_tray.cpp" line="385"/>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
-        <location filename="../mainwindow_webengine.cpp" line="1577"/>
-        <location filename="../mainwindow_webengine.cpp" line="1628"/>
-        <location filename="../mainwindow_webengine.cpp" line="1663"/>
-        <location filename="../mainwindow_webengine.cpp" line="1693"/>
-        <location filename="../mainwindow_webengine.cpp" line="1697"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
+        <location filename="../mainwindow_webengine.cpp" line="1604"/>
+        <location filename="../mainwindow_webengine.cpp" line="1655"/>
+        <location filename="../mainwindow_webengine.cpp" line="1690"/>
+        <location filename="../mainwindow_webengine.cpp" line="1720"/>
+        <location filename="../mainwindow_webengine.cpp" line="1724"/>
         <source>Export chat</source>
         <translation>Експортувати чат</translation>
     </message>
@@ -1283,7 +1283,12 @@ Open Settings now?</source>
         <translation>Очікування мережі…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1204"/>
+        <location filename="../mainwindow_webengine.cpp" line="1207"/>
+        <source>WhatsApp greys out voice and video calls for the Chrome version this user agent reports (%1). To get them back, set the user agent in Settings to one that reports Chrome %2. (Click to dismiss.)</source>
+        <translation>WhatsApp вимикає голосові та відеодзвінки для версії Chrome, яку повідомляє цей user agent (%1). Щоб повернути їх, задайте в налаштуваннях user agent, що повідомляє Chrome %2. (Натисніть, щоб закрити.)</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow_webengine.cpp" line="1231"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs. Photos and WebM/VP9 videos work. For MP4, use the Flatpak, whose engine is built with them. (Click to dismiss.)</source>
         <translation>Ця збірка не може надсилати відео H.264/MP4: її рушій браузера зібрано без пропрієтарних кодеків. Фото та відео WebM/VP9 працюють. Для MP4 скористайтеся версією Flatpak, рушій якої зібрано з ними. (Натисніть, щоб закрити.)</translation>
     </message>
@@ -1292,156 +1297,156 @@ Open Settings now?</source>
         <translation type="vanished">Ця збірка не може надсилати відео H.264/MP4: її рушій браузера зібрано без пропрієтарних кодеків. Фото та відео WebM/VP9 працюють; для MP4 використовуйте пакет дистрибутива/нативний, зібраний із кодеками. (Натисніть, щоб закрити.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1517"/>
+        <location filename="../mainwindow_webengine.cpp" line="1544"/>
         <source>Inline translation is off (enable it in Settings → Translation).</source>
         <translation>Вбудований переклад вимкнено (увімкніть його в Налаштування → Переклад).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1521"/>
+        <location filename="../mainwindow_webengine.cpp" line="1548"/>
         <source>The message box is empty.</source>
         <translation>Поле повідомлення порожнє.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1522"/>
+        <location filename="../mainwindow_webengine.cpp" line="1549"/>
         <source>Select some text to translate first.</source>
         <translation>Спочатку виділіть текст для перекладу.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
         <source>No conversation is open.</source>
         <translation>Немає відкритої розмови.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
         <source>An export is already running.</source>
         <translation>Експорт вже виконується.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1569"/>
+        <location filename="../mainwindow_webengine.cpp" line="1596"/>
         <source>Choose a folder for the exported chat</source>
         <translation>Виберіть теку для експортованого чату</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1575"/>
+        <location filename="../mainwindow_webengine.cpp" line="1602"/>
         <source>Collecting messages… scrolling through the conversation.</source>
         <translation>Збирання повідомлень… прокручування розмови.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1555"/>
-        <location filename="../mainwindow_webengine.cpp" line="1576"/>
+        <location filename="../mainwindow_webengine.cpp" line="1603"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1216"/>
+        <location filename="../mainwindow_webengine.cpp" line="1243"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs, and no build of Whatly with them exists for this platform. Photos and WebM/VP9 videos work; to send an MP4, convert it to WebM first or share it as a document. (Click to dismiss.)</source>
         <translation>Ця збірка не може надсилати відео H.264/MP4: її рушій браузера зібрано без пропрієтарних кодеків, і для цієї платформи немає збірки Whatly з ними. Фото та відео WebM/VP9 працюють; щоб надіслати MP4, спершу перетворіть його на WebM або поділіться ним як документом. (Натисніть, щоб закрити.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1228"/>
+        <location filename="../mainwindow_webengine.cpp" line="1255"/>
         <source>Voice and video calls need the same codecs, so this build cannot make them either.</source>
         <translation>Голосові та відеодзвінки потребують тих самих кодеків, тож ця збірка також не зможе їх здійснювати.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1623"/>
+        <location filename="../mainwindow_webengine.cpp" line="1650"/>
         <source>Collecting messages… (%1 so far)</source>
         <translation>Збирання повідомлень… (наразі %1)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1629"/>
+        <location filename="../mainwindow_webengine.cpp" line="1656"/>
         <source>Could not read the conversation: %1</source>
         <translation>Не вдалося прочитати розмову: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb on.</source>
         <translation>Не турбувати увімкнено.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb off.</source>
         <translation>Не турбувати вимкнено.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1983"/>
-        <location filename="../mainwindow_webengine.cpp" line="1999"/>
+        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2026"/>
         <source>Do Not Disturb on until %1.</source>
         <translation>Не турбувати увімкнено до %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2037"/>
         <source>Open a chat to set a reply reminder.</source>
         <translation>Відкрийте чат, щоб установити нагадування про відповідь.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2016"/>
+        <location filename="../mainwindow_webengine.cpp" line="2043"/>
         <source>Time to reply to this chat.</source>
         <translation>Час відповісти в цьому чаті.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2019"/>
+        <location filename="../mainwindow_webengine.cpp" line="2046"/>
         <source>Reply reminder set for %1.</source>
         <translation>Нагадування про відповідь установлено на %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2050"/>
-        <location filename="../mainwindow_webengine.cpp" line="2074"/>
+        <location filename="../mainwindow_webengine.cpp" line="2077"/>
+        <location filename="../mainwindow_webengine.cpp" line="2101"/>
         <source>Low disk space</source>
         <translation>Мало місця на диску</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2051"/>
+        <location filename="../mainwindow_webengine.cpp" line="2078"/>
         <source>Whatly&apos;s data folder has only %1 free.</source>
         <translation>У теці даних Whatly вільно лише %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2054"/>
+        <location filename="../mainwindow_webengine.cpp" line="2081"/>
         <source>With so little space, WhatsApp Web&apos;s local database can be corrupted by a truncated write, which forces you to link your phone again. Move Whatly&apos;s data folder to a disk with more room, or free up space.</source>
         <translation>За такого малого обсягу локальна база даних WhatsApp Web може пошкодитися через обірваний запис, і доведеться знову прив&apos;язувати телефон. Перемістіть теку даних Whatly на місткіший диск або звільніть місце.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2058"/>
+        <location filename="../mainwindow_webengine.cpp" line="2085"/>
         <source>Change folder…</source>
         <translation>Змінити теку…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2059"/>
+        <location filename="../mainwindow_webengine.cpp" line="2086"/>
         <source>Later</source>
         <translation type="unfinished">Пізніше</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2067"/>
+        <location filename="../mainwindow_webengine.cpp" line="2094"/>
         <source>Choose a data folder for Whatly</source>
         <translation>Виберіть теку даних для Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2075"/>
+        <location filename="../mainwindow_webengine.cpp" line="2102"/>
         <source>That folder is also low on space (%1 free). Please pick another.</source>
         <translation>У цій теці теж мало місця (вільно %1). Виберіть іншу.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2082"/>
+        <location filename="../mainwindow_webengine.cpp" line="2109"/>
         <source>Restart Whatly</source>
         <translation>Перезапустити Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2083"/>
+        <location filename="../mainwindow_webengine.cpp" line="2110"/>
         <source>Whatly will use &quot;%1&quot; as its data folder after a restart. Your current data stays where it is (you can move it there yourself). Restart now?</source>
         <translation>Після перезапуску Whatly використовуватиме «%1» як теку даних. Ваші поточні дані залишаться на місці (можете перенести їх самі). Перезапустити зараз?</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2103"/>
+        <location filename="../mainwindow_webengine.cpp" line="2130"/>
         <source>No unread chats to summarise.</source>
         <translation>Немає непрочитаних чатів для підсумку.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2108"/>
+        <location filename="../mainwindow_webengine.cpp" line="2135"/>
         <source>Unread digest</source>
         <translation>Підсумок непрочитаного</translation>
     </message>
     <message>
         <location filename="../mainwindow_accounts.cpp" line="1593"/>
-        <location filename="../mainwindow_webengine.cpp" line="1652"/>
+        <location filename="../mainwindow_webengine.cpp" line="1679"/>
         <source>chat</source>
         <translation>чат</translation>
     </message>
@@ -1451,64 +1456,64 @@ Open Settings now?</source>
         <translation>чати</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1664"/>
+        <location filename="../mainwindow_webengine.cpp" line="1691"/>
         <source>Could not create the export folder.</source>
         <translation>Не вдалося створити теку експорту.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1694"/>
+        <location filename="../mainwindow_webengine.cpp" line="1721"/>
         <source>The export could not be fully written.</source>
         <translation>Не вдалося повністю записати експорт.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1698"/>
+        <location filename="../mainwindow_webengine.cpp" line="1725"/>
         <source>Saved %1 messages and %2 media files to %3</source>
         <translation>Збережено %1 повідомлень та %2 медіафайлів до %3</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1787"/>
+        <location filename="../mainwindow_webengine.cpp" line="1814"/>
         <source>The AI assistant is off (enable it in Settings → AI assistant).</source>
         <translation>Асистент ШІ вимкнено (увімкніть його в Налаштування → Асистент ШІ).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1792"/>
+        <location filename="../mainwindow_webengine.cpp" line="1819"/>
         <source>There is nothing for the assistant to work on.</source>
         <translation>Асистенту немає з чим працювати.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1804"/>
+        <location filename="../mainwindow_webengine.cpp" line="1831"/>
         <source>Asking the assistant… (low memory: %1 MB free; a local model may fail or slow the app)</source>
         <translation>Запит до асистента… (мало пам&apos;яті: вільно %1 МБ; локальна модель може дати збій або сповільнити застосунок)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1809"/>
+        <location filename="../mainwindow_webengine.cpp" line="1836"/>
         <source>Asking the assistant…</source>
         <translation>Запит до асистента…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1830"/>
+        <location filename="../mainwindow_webengine.cpp" line="1857"/>
         <source>AI assistant</source>
         <translation>Асистент ШІ</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1845"/>
+        <location filename="../mainwindow_webengine.cpp" line="1872"/>
         <source>Close</source>
         <translation>Закрити</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1855"/>
-        <location filename="../mainwindow_webengine.cpp" line="1869"/>
-        <location filename="../mainwindow_webengine.cpp" line="1892"/>
+        <location filename="../mainwindow_webengine.cpp" line="1882"/>
+        <location filename="../mainwindow_webengine.cpp" line="1896"/>
+        <location filename="../mainwindow_webengine.cpp" line="1919"/>
         <source>AI result</source>
         <translation>Результат ШІ</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1889"/>
+        <location filename="../mainwindow_webengine.cpp" line="1916"/>
         <source>Message updated.</source>
         <translation>Повідомлення оновлено.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1905"/>
+        <location filename="../mainwindow_webengine.cpp" line="1932"/>
         <source>Chat summary</source>
         <translation>Підсумок чату</translation>
     </message>
@@ -4253,28 +4258,28 @@ Please setup the password in the Settings first.</source>
         <translation>Типово для системи</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3065"/>
+        <location filename="../settingswidget.cpp" line="3092"/>
         <source>The interface language will change when you restart %1.</source>
         <translation>Мова інтерфейсу зміниться після перезапуску %1.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3090"/>
+        <location filename="../settingswidget.cpp" line="3117"/>
         <source>App Lock Setup</source>
         <translation>Налаштування блокування застосунку</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3091"/>
+        <location filename="../settingswidget.cpp" line="3118"/>
         <source>Please setup the App lock password first.</source>
         <translation>Спочатку налаштуйте пароль блокування застосунку.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3207"/>
-        <location filename="../settingswidget.cpp" line="3218"/>
+        <location filename="../settingswidget.cpp" line="3234"/>
+        <location filename="../settingswidget.cpp" line="3245"/>
         <source>Select download directory</source>
         <translation>Виберіть теку завантаження</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3258"/>
+        <location filename="../settingswidget.cpp" line="3285"/>
         <source>You are about to change your current app lock password!
 
 This will LogOut your current session.
@@ -4285,7 +4290,7 @@ You may also require a complete restart of Application!</source>
 Може також знадобитися повний перезапуск застосунку!</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3264"/>
+        <location filename="../settingswidget.cpp" line="3291"/>
         <source>Do you want to proceed?</source>
         <translation>Бажаєте продовжити?</translation>
     </message>

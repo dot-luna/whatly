@@ -211,17 +211,17 @@ Apakah Anda ingin melewati pemeriksaan keamanan dan melanjutkan?   </translation
 <context>
     <name>ChatListStrip</name>
     <message>
-        <location filename="../chatliststrip.cpp" line="866"/>
+        <location filename="../chatliststrip.cpp" line="1029"/>
         <source>Small</source>
         <translation>Kecil</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="868"/>
+        <location filename="../chatliststrip.cpp" line="1031"/>
         <source>Medium</source>
         <translation>Sedang</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="870"/>
+        <location filename="../chatliststrip.cpp" line="1033"/>
         <source>Large</source>
         <translation>Besar</translation>
     </message>
@@ -595,7 +595,12 @@ Apakah Anda ingin melewati pemeriksaan keamanan dan melanjutkan?   </translation
         <translation>Menunggu jaringan…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1204"/>
+        <location filename="../mainwindow_webengine.cpp" line="1207"/>
+        <source>WhatsApp greys out voice and video calls for the Chrome version this user agent reports (%1). To get them back, set the user agent in Settings to one that reports Chrome %2. (Click to dismiss.)</source>
+        <translation>WhatsApp menonaktifkan panggilan suara dan video untuk versi Chrome yang dilaporkan user agent ini (%1). Untuk mengembalikannya, atur di Pengaturan user agent yang melaporkan Chrome %2. (Klik untuk menutup.)</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow_webengine.cpp" line="1231"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs. Photos and WebM/VP9 videos work. For MP4, use the Flatpak, whose engine is built with them. (Click to dismiss.)</source>
         <translation>Build ini tidak dapat mengirim video H.264/MP4: mesin perambannya dibangun tanpa codec berpemilik. Foto dan video WebM/VP9 tetap berfungsi. Untuk MP4, gunakan Flatpak, yang mesinnya dibangun dengan codec tersebut. (Klik untuk menutup.)</translation>
     </message>
@@ -604,146 +609,146 @@ Apakah Anda ingin melewati pemeriksaan keamanan dan melanjutkan?   </translation
         <translation type="vanished">Build ini tidak dapat mengirim video H.264/MP4: mesin perambannya dibangun tanpa codec berpemilik. Foto dan video WebM/VP9 berfungsi; untuk MP4, gunakan paket distro/native yang dibangun dengan codec. (Klik untuk menutup.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1517"/>
+        <location filename="../mainwindow_webengine.cpp" line="1544"/>
         <source>Inline translation is off (enable it in Settings → Translation).</source>
         <translation>Terjemahan sebaris nonaktif (aktifkan di Pengaturan → Terjemahan).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1521"/>
+        <location filename="../mainwindow_webengine.cpp" line="1548"/>
         <source>The message box is empty.</source>
         <translation>Kotak pesan kosong.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1522"/>
+        <location filename="../mainwindow_webengine.cpp" line="1549"/>
         <source>Select some text to translate first.</source>
         <translation>Pilih dulu teks yang akan diterjemahkan.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
         <source>No conversation is open.</source>
         <translation>Tidak ada percakapan yang terbuka.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
         <source>An export is already running.</source>
         <translation>Ekspor sedang berjalan.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1569"/>
+        <location filename="../mainwindow_webengine.cpp" line="1596"/>
         <source>Choose a folder for the exported chat</source>
         <translation>Pilih folder untuk obrolan yang diekspor</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1575"/>
+        <location filename="../mainwindow_webengine.cpp" line="1602"/>
         <source>Collecting messages… scrolling through the conversation.</source>
         <translation>Mengumpulkan pesan… menggulir percakapan.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1555"/>
-        <location filename="../mainwindow_webengine.cpp" line="1576"/>
+        <location filename="../mainwindow_webengine.cpp" line="1603"/>
         <source>Cancel</source>
         <translation type="unfinished">Batal</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1623"/>
+        <location filename="../mainwindow_webengine.cpp" line="1650"/>
         <source>Collecting messages… (%1 so far)</source>
         <translation>Mengumpulkan pesan… (%1 sejauh ini)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1629"/>
+        <location filename="../mainwindow_webengine.cpp" line="1656"/>
         <source>Could not read the conversation: %1</source>
         <translation>Tidak dapat membaca percakapan: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb on.</source>
         <translation>Jangan Ganggu aktif.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb off.</source>
         <translation>Jangan Ganggu nonaktif.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1983"/>
-        <location filename="../mainwindow_webengine.cpp" line="1999"/>
+        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2026"/>
         <source>Do Not Disturb on until %1.</source>
         <translation>Jangan Ganggu aktif hingga %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2037"/>
         <source>Open a chat to set a reply reminder.</source>
         <translation>Buka obrolan untuk mengatur pengingat balasan.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2016"/>
+        <location filename="../mainwindow_webengine.cpp" line="2043"/>
         <source>Time to reply to this chat.</source>
         <translation>Waktunya membalas obrolan ini.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2019"/>
+        <location filename="../mainwindow_webengine.cpp" line="2046"/>
         <source>Reply reminder set for %1.</source>
         <translation>Pengingat balasan diatur untuk %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2050"/>
-        <location filename="../mainwindow_webengine.cpp" line="2074"/>
+        <location filename="../mainwindow_webengine.cpp" line="2077"/>
+        <location filename="../mainwindow_webengine.cpp" line="2101"/>
         <source>Low disk space</source>
         <translation>Ruang disk menipis</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2051"/>
+        <location filename="../mainwindow_webengine.cpp" line="2078"/>
         <source>Whatly&apos;s data folder has only %1 free.</source>
         <translation>Folder data Whatly hanya tersisa %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2054"/>
+        <location filename="../mainwindow_webengine.cpp" line="2081"/>
         <source>With so little space, WhatsApp Web&apos;s local database can be corrupted by a truncated write, which forces you to link your phone again. Move Whatly&apos;s data folder to a disk with more room, or free up space.</source>
         <translation>Dengan ruang sekecil ini, basis data lokal WhatsApp Web bisa rusak karena penulisan terpotong, sehingga memaksa Anda menautkan ponsel lagi. Pindahkan folder data Whatly ke disk yang lebih lega, atau kosongkan ruang.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2058"/>
+        <location filename="../mainwindow_webengine.cpp" line="2085"/>
         <source>Change folder…</source>
         <translation>Ubah folder…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2059"/>
+        <location filename="../mainwindow_webengine.cpp" line="2086"/>
         <source>Later</source>
         <translation type="unfinished">Nanti</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2067"/>
+        <location filename="../mainwindow_webengine.cpp" line="2094"/>
         <source>Choose a data folder for Whatly</source>
         <translation>Pilih folder data untuk Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2075"/>
+        <location filename="../mainwindow_webengine.cpp" line="2102"/>
         <source>That folder is also low on space (%1 free). Please pick another.</source>
         <translation>Folder itu juga kekurangan ruang (%1 tersisa). Silakan pilih yang lain.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2082"/>
+        <location filename="../mainwindow_webengine.cpp" line="2109"/>
         <source>Restart Whatly</source>
         <translation>Mulai ulang Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2083"/>
+        <location filename="../mainwindow_webengine.cpp" line="2110"/>
         <source>Whatly will use &quot;%1&quot; as its data folder after a restart. Your current data stays where it is (you can move it there yourself). Restart now?</source>
         <translation>Whatly akan memakai &quot;%1&quot; sebagai folder data setelah mulai ulang. Data Anda saat ini tetap di tempatnya (Anda bisa memindahkannya sendiri). Mulai ulang sekarang?</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2103"/>
+        <location filename="../mainwindow_webengine.cpp" line="2130"/>
         <source>No unread chats to summarise.</source>
         <translation>Tidak ada obrolan belum dibaca untuk diringkas.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2108"/>
+        <location filename="../mainwindow_webengine.cpp" line="2135"/>
         <source>Unread digest</source>
         <translation>Ringkasan belum dibaca</translation>
     </message>
     <message>
         <location filename="../mainwindow_accounts.cpp" line="1593"/>
-        <location filename="../mainwindow_webengine.cpp" line="1652"/>
+        <location filename="../mainwindow_webengine.cpp" line="1679"/>
         <source>chat</source>
         <translation>obrolan</translation>
     </message>
@@ -753,74 +758,74 @@ Apakah Anda ingin melewati pemeriksaan keamanan dan melanjutkan?   </translation
         <translation>obrolan</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1664"/>
+        <location filename="../mainwindow_webengine.cpp" line="1691"/>
         <source>Could not create the export folder.</source>
         <translation>Tidak dapat membuat folder ekspor.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1694"/>
+        <location filename="../mainwindow_webengine.cpp" line="1721"/>
         <source>The export could not be fully written.</source>
         <translation>Ekspor tidak dapat ditulis sepenuhnya.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1698"/>
+        <location filename="../mainwindow_webengine.cpp" line="1725"/>
         <source>Saved %1 messages and %2 media files to %3</source>
         <translation>Menyimpan %1 pesan dan %2 berkas media ke %3</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1787"/>
+        <location filename="../mainwindow_webengine.cpp" line="1814"/>
         <source>The AI assistant is off (enable it in Settings → AI assistant).</source>
         <translation>Asisten AI nonaktif (aktifkan di Pengaturan → Asisten AI).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1792"/>
+        <location filename="../mainwindow_webengine.cpp" line="1819"/>
         <source>There is nothing for the assistant to work on.</source>
         <translation>Tidak ada yang bisa dikerjakan asisten.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1804"/>
+        <location filename="../mainwindow_webengine.cpp" line="1831"/>
         <source>Asking the assistant… (low memory: %1 MB free; a local model may fail or slow the app)</source>
         <translation>Menanyakan asisten… (memori rendah: %1 MB kosong; model lokal bisa gagal atau memperlambat aplikasi)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1809"/>
+        <location filename="../mainwindow_webengine.cpp" line="1836"/>
         <source>Asking the assistant…</source>
         <translation>Menanyakan asisten…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1830"/>
+        <location filename="../mainwindow_webengine.cpp" line="1857"/>
         <source>AI assistant</source>
         <translation type="unfinished">Asisten AI</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1889"/>
+        <location filename="../mainwindow_webengine.cpp" line="1916"/>
         <source>Message updated.</source>
         <translation>Pesan diperbarui.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1855"/>
-        <location filename="../mainwindow_webengine.cpp" line="1869"/>
-        <location filename="../mainwindow_webengine.cpp" line="1892"/>
+        <location filename="../mainwindow_webengine.cpp" line="1882"/>
+        <location filename="../mainwindow_webengine.cpp" line="1896"/>
+        <location filename="../mainwindow_webengine.cpp" line="1919"/>
         <source>AI result</source>
         <translation>Hasil AI</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1216"/>
+        <location filename="../mainwindow_webengine.cpp" line="1243"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs, and no build of Whatly with them exists for this platform. Photos and WebM/VP9 videos work; to send an MP4, convert it to WebM first or share it as a document. (Click to dismiss.)</source>
         <translation>Build ini tidak dapat mengirim video H.264/MP4: mesin perambannya dibangun tanpa codec berpemilik, dan tidak ada build Whatly dengan codec tersebut untuk platform ini. Foto dan video WebM/VP9 berfungsi; untuk mengirim MP4, konversikan dulu ke WebM atau bagikan sebagai dokumen. (Klik untuk menutup.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1228"/>
+        <location filename="../mainwindow_webengine.cpp" line="1255"/>
         <source>Voice and video calls need the same codecs, so this build cannot make them either.</source>
         <translation>Panggilan suara dan video membutuhkan codec yang sama, jadi build ini juga tidak dapat melakukannya.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1905"/>
+        <location filename="../mainwindow_webengine.cpp" line="1932"/>
         <source>Chat summary</source>
         <translation>Ringkasan obrolan</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1845"/>
+        <location filename="../mainwindow_webengine.cpp" line="1872"/>
         <source>Close</source>
         <translation type="unfinished">Tutup</translation>
     </message>
@@ -961,7 +966,7 @@ WebEngine belum diinisialisasi.</translation>
     <message>
         <location filename="../mainwindow.cpp" line="1229"/>
         <location filename="../mainwindow.cpp" line="1970"/>
-        <location filename="../mainwindow_webengine.cpp" line="1731"/>
+        <location filename="../mainwindow_webengine.cpp" line="1758"/>
         <source>Whatly is locked. Unlock it to send messages.</source>
         <translation>Whatly terkunci. Buka kunci untuk mengirim pesan.</translation>
     </message>
@@ -1313,13 +1318,13 @@ Buka pengaturan sekarang?</translation>
     </message>
     <message>
         <location filename="../mainwindow_tray.cpp" line="385"/>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
-        <location filename="../mainwindow_webengine.cpp" line="1577"/>
-        <location filename="../mainwindow_webengine.cpp" line="1628"/>
-        <location filename="../mainwindow_webengine.cpp" line="1663"/>
-        <location filename="../mainwindow_webengine.cpp" line="1693"/>
-        <location filename="../mainwindow_webengine.cpp" line="1697"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
+        <location filename="../mainwindow_webengine.cpp" line="1604"/>
+        <location filename="../mainwindow_webengine.cpp" line="1655"/>
+        <location filename="../mainwindow_webengine.cpp" line="1690"/>
+        <location filename="../mainwindow_webengine.cpp" line="1720"/>
+        <location filename="../mainwindow_webengine.cpp" line="1724"/>
         <source>Export chat</source>
         <translation>Ekspor obrolan</translation>
     </message>
@@ -4253,28 +4258,28 @@ Silakan atur kata sandi di pengaturan terlebih dahulu.</translation>
         <translation>Bawaan sistem</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3065"/>
+        <location filename="../settingswidget.cpp" line="3092"/>
         <source>The interface language will change when you restart %1.</source>
         <translation>Bahasa antarmuka akan berubah saat Anda memulai ulang %1.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3090"/>
+        <location filename="../settingswidget.cpp" line="3117"/>
         <source>App Lock Setup</source>
         <translation>Penyiapan Kunci Aplikasi</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3091"/>
+        <location filename="../settingswidget.cpp" line="3118"/>
         <source>Please setup the App lock password first.</source>
         <translation>Silakan siapkan kata sandi kunci aplikasi terlebih dahulu.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3207"/>
-        <location filename="../settingswidget.cpp" line="3218"/>
+        <location filename="../settingswidget.cpp" line="3234"/>
+        <location filename="../settingswidget.cpp" line="3245"/>
         <source>Select download directory</source>
         <translation>Pilih folder unduhan</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3258"/>
+        <location filename="../settingswidget.cpp" line="3285"/>
         <source>You are about to change your current app lock password!
 
 This will LogOut your current session.
@@ -4285,7 +4290,7 @@ Ini akan mengeluarkan sesi Anda saat ini.
 Anda mungkin juga perlu memulai ulang aplikasi sepenuhnya!</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3264"/>
+        <location filename="../settingswidget.cpp" line="3291"/>
         <source>Do you want to proceed?</source>
         <translation>Apakah Anda ingin melanjutkan?</translation>
     </message>

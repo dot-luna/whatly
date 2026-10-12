@@ -203,17 +203,17 @@ Do you wish to override the security check and continue ?   </source>
 <context>
     <name>ChatListStrip</name>
     <message>
-        <location filename="../chatliststrip.cpp" line="866"/>
+        <location filename="../chatliststrip.cpp" line="1029"/>
         <source>Small</source>
         <translation>Μικρό</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="868"/>
+        <location filename="../chatliststrip.cpp" line="1031"/>
         <source>Medium</source>
         <translation>Μεσαίο</translation>
     </message>
     <message>
-        <location filename="../chatliststrip.cpp" line="870"/>
+        <location filename="../chatliststrip.cpp" line="1033"/>
         <source>Large</source>
         <translation>Μεγάλο</translation>
     </message>
@@ -638,7 +638,7 @@ Webengine is not initialized.</source>
     <message>
         <location filename="../mainwindow.cpp" line="1229"/>
         <location filename="../mainwindow.cpp" line="1970"/>
-        <location filename="../mainwindow_webengine.cpp" line="1731"/>
+        <location filename="../mainwindow_webengine.cpp" line="1758"/>
         <source>Whatly is locked. Unlock it to send messages.</source>
         <translation>Το Whatly είναι κλειδωμένο. Ξεκλειδώστε το για να στέλνετε μηνύματα.</translation>
     </message>
@@ -717,7 +717,7 @@ Webengine is not initialized.</source>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="1555"/>
-        <location filename="../mainwindow_webengine.cpp" line="1576"/>
+        <location filename="../mainwindow_webengine.cpp" line="1603"/>
         <source>Cancel</source>
         <translation>Άκυρο</translation>
     </message>
@@ -851,7 +851,7 @@ Webengine is not initialized.</source>
     </message>
     <message>
         <location filename="../mainwindow_accounts.cpp" line="1593"/>
-        <location filename="../mainwindow_webengine.cpp" line="1652"/>
+        <location filename="../mainwindow_webengine.cpp" line="1679"/>
         <source>chat</source>
         <translation>συνομιλία</translation>
     </message>
@@ -1146,13 +1146,13 @@ Open Settings now?</source>
     </message>
     <message>
         <location filename="../mainwindow_tray.cpp" line="385"/>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
-        <location filename="../mainwindow_webengine.cpp" line="1577"/>
-        <location filename="../mainwindow_webengine.cpp" line="1628"/>
-        <location filename="../mainwindow_webengine.cpp" line="1663"/>
-        <location filename="../mainwindow_webengine.cpp" line="1693"/>
-        <location filename="../mainwindow_webengine.cpp" line="1697"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
+        <location filename="../mainwindow_webengine.cpp" line="1604"/>
+        <location filename="../mainwindow_webengine.cpp" line="1655"/>
+        <location filename="../mainwindow_webengine.cpp" line="1690"/>
+        <location filename="../mainwindow_webengine.cpp" line="1720"/>
+        <location filename="../mainwindow_webengine.cpp" line="1724"/>
         <source>Export chat</source>
         <translation>Εξαγωγή συνομιλίας</translation>
     </message>
@@ -1243,211 +1243,216 @@ Open Settings now?</source>
         <translation>Αναμονή για δίκτυο…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1204"/>
+        <location filename="../mainwindow_webengine.cpp" line="1207"/>
+        <source>WhatsApp greys out voice and video calls for the Chrome version this user agent reports (%1). To get them back, set the user agent in Settings to one that reports Chrome %2. (Click to dismiss.)</source>
+        <translation>Το WhatsApp απενεργοποιεί τις φωνητικές κλήσεις και τις βιντεοκλήσεις για την έκδοση του Chrome που δηλώνει αυτός ο παράγοντας χρήστη (%1). Για να τις επαναφέρετε, ορίστε στις Ρυθμίσεις έναν παράγοντα χρήστη που δηλώνει Chrome %2. (Κάντε κλικ για κλείσιμο.)</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow_webengine.cpp" line="1231"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs. Photos and WebM/VP9 videos work. For MP4, use the Flatpak, whose engine is built with them. (Click to dismiss.)</source>
         <translation>Αυτή η έκδοση δεν μπορεί να στείλει βίντεο H.264/MP4: η μηχανή περιήγησής της δομήθηκε χωρίς τους ιδιόκτητους κωδικοποιητές. Οι φωτογραφίες και τα βίντεο WebM/VP9 λειτουργούν. Για MP4, χρησιμοποιήστε το Flatpak, του οποίου η μηχανή είναι δομημένη με αυτούς. (Κάντε κλικ για κλείσιμο.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1216"/>
+        <location filename="../mainwindow_webengine.cpp" line="1243"/>
         <source>This build cannot send H.264/MP4 videos: its browser engine was built without the proprietary codecs, and no build of Whatly with them exists for this platform. Photos and WebM/VP9 videos work; to send an MP4, convert it to WebM first or share it as a document. (Click to dismiss.)</source>
         <translation>Αυτή η έκδοση δεν μπορεί να στείλει βίντεο H.264/MP4: η μηχανή περιήγησής της δομήθηκε χωρίς τους ιδιόκτητους κωδικοποιητές, και δεν υπάρχει έκδοση του Whatly με αυτούς για αυτή την πλατφόρμα. Οι φωτογραφίες και τα βίντεο WebM/VP9 λειτουργούν· για να στείλετε ένα MP4, μετατρέψτε το πρώτα σε WebM ή μοιραστείτε το ως έγγραφο. (Κάντε κλικ για κλείσιμο.)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1228"/>
+        <location filename="../mainwindow_webengine.cpp" line="1255"/>
         <source>Voice and video calls need the same codecs, so this build cannot make them either.</source>
         <translation>Οι φωνητικές και βιντεοκλήσεις χρειάζονται τους ίδιους κωδικοποιητές, οπότε ούτε αυτή η έκδοση μπορεί να τις πραγματοποιήσει.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1517"/>
+        <location filename="../mainwindow_webengine.cpp" line="1544"/>
         <source>Inline translation is off (enable it in Settings → Translation).</source>
         <translation>Η ενσωματωμένη μετάφραση είναι ανενεργή (ενεργοποιήστε την στις Ρυθμίσεις → Μετάφραση).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1521"/>
+        <location filename="../mainwindow_webengine.cpp" line="1548"/>
         <source>The message box is empty.</source>
         <translation>Το πλαίσιο μηνύματος είναι κενό.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1522"/>
+        <location filename="../mainwindow_webengine.cpp" line="1549"/>
         <source>Select some text to translate first.</source>
         <translation>Επιλέξτε πρώτα κάποιο κείμενο για μετάφραση.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1560"/>
+        <location filename="../mainwindow_webengine.cpp" line="1587"/>
         <source>No conversation is open.</source>
         <translation>Δεν υπάρχει ανοιχτή συνομιλία.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1564"/>
+        <location filename="../mainwindow_webengine.cpp" line="1591"/>
         <source>An export is already running.</source>
         <translation>Μια εξαγωγή εκτελείται ήδη.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1569"/>
+        <location filename="../mainwindow_webengine.cpp" line="1596"/>
         <source>Choose a folder for the exported chat</source>
         <translation>Επιλέξτε έναν φάκελο για την εξαγόμενη συνομιλία</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1575"/>
+        <location filename="../mainwindow_webengine.cpp" line="1602"/>
         <source>Collecting messages… scrolling through the conversation.</source>
         <translation>Συλλογή μηνυμάτων… κύλιση στη συνομιλία.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1623"/>
+        <location filename="../mainwindow_webengine.cpp" line="1650"/>
         <source>Collecting messages… (%1 so far)</source>
         <translation>Συλλογή μηνυμάτων… (%1 μέχρι τώρα)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1629"/>
+        <location filename="../mainwindow_webengine.cpp" line="1656"/>
         <source>Could not read the conversation: %1</source>
         <translation>Δεν ήταν δυνατή η ανάγνωση της συνομιλίας: %1</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1664"/>
+        <location filename="../mainwindow_webengine.cpp" line="1691"/>
         <source>Could not create the export folder.</source>
         <translation>Δεν ήταν δυνατή η δημιουργία του φακέλου εξαγωγής.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1694"/>
+        <location filename="../mainwindow_webengine.cpp" line="1721"/>
         <source>The export could not be fully written.</source>
         <translation>Η εξαγωγή δεν ήταν δυνατόν να γραφτεί πλήρως.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1698"/>
+        <location filename="../mainwindow_webengine.cpp" line="1725"/>
         <source>Saved %1 messages and %2 media files to %3</source>
         <translation>Αποθηκεύτηκαν %1 μηνύματα και %2 αρχεία πολυμέσων στο %3</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1787"/>
+        <location filename="../mainwindow_webengine.cpp" line="1814"/>
         <source>The AI assistant is off (enable it in Settings → AI assistant).</source>
         <translation>Ο βοηθός AI είναι ανενεργός (ενεργοποιήστε τον στις Ρυθμίσεις → Βοηθός AI).</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1792"/>
+        <location filename="../mainwindow_webengine.cpp" line="1819"/>
         <source>There is nothing for the assistant to work on.</source>
         <translation>Δεν υπάρχει τίποτα για να επεξεργαστεί ο βοηθός.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1804"/>
+        <location filename="../mainwindow_webengine.cpp" line="1831"/>
         <source>Asking the assistant… (low memory: %1 MB free; a local model may fail or slow the app)</source>
         <translation>Ερώτηση στον βοηθό… (χαμηλή μνήμη: %1 MB ελεύθερα· ένα τοπικό μοντέλο μπορεί να αποτύχει ή να επιβραδύνει την εφαρμογή)</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1809"/>
+        <location filename="../mainwindow_webengine.cpp" line="1836"/>
         <source>Asking the assistant…</source>
         <translation>Ερώτηση στον βοηθό…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1830"/>
+        <location filename="../mainwindow_webengine.cpp" line="1857"/>
         <source>AI assistant</source>
         <translation>Βοηθός AI</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1845"/>
+        <location filename="../mainwindow_webengine.cpp" line="1872"/>
         <source>Close</source>
         <translation>Κλείσιμο</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1855"/>
-        <location filename="../mainwindow_webengine.cpp" line="1869"/>
-        <location filename="../mainwindow_webengine.cpp" line="1892"/>
+        <location filename="../mainwindow_webengine.cpp" line="1882"/>
+        <location filename="../mainwindow_webengine.cpp" line="1896"/>
+        <location filename="../mainwindow_webengine.cpp" line="1919"/>
         <source>AI result</source>
         <translation>Αποτέλεσμα AI</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1889"/>
+        <location filename="../mainwindow_webengine.cpp" line="1916"/>
         <source>Message updated.</source>
         <translation>Το μήνυμα ενημερώθηκε.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1905"/>
+        <location filename="../mainwindow_webengine.cpp" line="1932"/>
         <source>Chat summary</source>
         <translation>Σύνοψη συνομιλίας</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb on.</source>
         <translation>Μην ενοχλείτε ενεργό.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1975"/>
+        <location filename="../mainwindow_webengine.cpp" line="2002"/>
         <source>Do Not Disturb off.</source>
         <translation>Μην ενοχλείτε ανενεργό.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="1983"/>
-        <location filename="../mainwindow_webengine.cpp" line="1999"/>
+        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2026"/>
         <source>Do Not Disturb on until %1.</source>
         <translation>Μην ενοχλείτε ενεργό έως %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2010"/>
+        <location filename="../mainwindow_webengine.cpp" line="2037"/>
         <source>Open a chat to set a reply reminder.</source>
         <translation>Ανοίξτε μια συνομιλία για να ορίσετε υπενθύμιση απάντησης.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2016"/>
+        <location filename="../mainwindow_webengine.cpp" line="2043"/>
         <source>Time to reply to this chat.</source>
         <translation>Ώρα να απαντήσετε σε αυτή τη συνομιλία.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2019"/>
+        <location filename="../mainwindow_webengine.cpp" line="2046"/>
         <source>Reply reminder set for %1.</source>
         <translation>Υπενθύμιση απάντησης ορίστηκε για %1.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2050"/>
-        <location filename="../mainwindow_webengine.cpp" line="2074"/>
+        <location filename="../mainwindow_webengine.cpp" line="2077"/>
+        <location filename="../mainwindow_webengine.cpp" line="2101"/>
         <source>Low disk space</source>
         <translation>Χαμηλός χώρος στον δίσκο</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2051"/>
+        <location filename="../mainwindow_webengine.cpp" line="2078"/>
         <source>Whatly&apos;s data folder has only %1 free.</source>
         <translation>Ο φάκελος δεδομένων του Whatly έχει μόνο %1 ελεύθερα.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2054"/>
+        <location filename="../mainwindow_webengine.cpp" line="2081"/>
         <source>With so little space, WhatsApp Web&apos;s local database can be corrupted by a truncated write, which forces you to link your phone again. Move Whatly&apos;s data folder to a disk with more room, or free up space.</source>
         <translation>Με τόσο λίγο χώρο, η τοπική βάση δεδομένων του WhatsApp Web μπορεί να καταστραφεί από μια περικομμένη εγγραφή, που σας αναγκάζει να συνδέσετε ξανά το τηλέφωνό σας. Μετακινήστε τον φάκελο δεδομένων του Whatly σε έναν δίσκο με περισσότερο χώρο, ή ελευθερώστε χώρο.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2058"/>
+        <location filename="../mainwindow_webengine.cpp" line="2085"/>
         <source>Change folder…</source>
         <translation>Αλλαγή φακέλου…</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2059"/>
+        <location filename="../mainwindow_webengine.cpp" line="2086"/>
         <source>Later</source>
         <translation>Αργότερα</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2067"/>
+        <location filename="../mainwindow_webengine.cpp" line="2094"/>
         <source>Choose a data folder for Whatly</source>
         <translation>Επιλέξτε έναν φάκελο δεδομένων για το Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2075"/>
+        <location filename="../mainwindow_webengine.cpp" line="2102"/>
         <source>That folder is also low on space (%1 free). Please pick another.</source>
         <translation>Και αυτός ο φάκελος έχει χαμηλό χώρο (%1 ελεύθερα). Επιλέξτε άλλον.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2082"/>
+        <location filename="../mainwindow_webengine.cpp" line="2109"/>
         <source>Restart Whatly</source>
         <translation>Επανεκκίνηση του Whatly</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2083"/>
+        <location filename="../mainwindow_webengine.cpp" line="2110"/>
         <source>Whatly will use &quot;%1&quot; as its data folder after a restart. Your current data stays where it is (you can move it there yourself). Restart now?</source>
         <translation>Το Whatly θα χρησιμοποιήσει το «%1» ως φάκελο δεδομένων μετά από επανεκκίνηση. Τα τρέχοντα δεδομένα σας παραμένουν εκεί που είναι (μπορείτε να τα μετακινήσετε εκεί μόνοι σας). Επανεκκίνηση τώρα;</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2103"/>
+        <location filename="../mainwindow_webengine.cpp" line="2130"/>
         <source>No unread chats to summarise.</source>
         <translation>Δεν υπάρχουν μη αναγνωσμένες συνομιλίες για σύνοψη.</translation>
     </message>
     <message>
-        <location filename="../mainwindow_webengine.cpp" line="2108"/>
+        <location filename="../mainwindow_webengine.cpp" line="2135"/>
         <source>Unread digest</source>
         <translation>Σύνοψη μη αναγνωσμένων</translation>
     </message>
@@ -4167,28 +4172,28 @@ Please setup the password in the Settings first.</source>
         <translation>Προεπιλογή συστήματος</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3065"/>
+        <location filename="../settingswidget.cpp" line="3092"/>
         <source>The interface language will change when you restart %1.</source>
         <translation>Η γλώσσα διεπαφής θα αλλάξει όταν επανεκκινήσετε το %1.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3090"/>
+        <location filename="../settingswidget.cpp" line="3117"/>
         <source>App Lock Setup</source>
         <translation>Ρύθμιση κλειδώματος εφαρμογής</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3091"/>
+        <location filename="../settingswidget.cpp" line="3118"/>
         <source>Please setup the App lock password first.</source>
         <translation>Ρυθμίστε πρώτα τον κωδικό κλειδώματος εφαρμογής.</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3207"/>
-        <location filename="../settingswidget.cpp" line="3218"/>
+        <location filename="../settingswidget.cpp" line="3234"/>
+        <location filename="../settingswidget.cpp" line="3245"/>
         <source>Select download directory</source>
         <translation>Επιλέξτε κατάλογο λήψης</translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3258"/>
+        <location filename="../settingswidget.cpp" line="3285"/>
         <source>You are about to change your current app lock password!
 
 This will LogOut your current session.
@@ -4196,7 +4201,7 @@ You may also require a complete restart of Application!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settingswidget.cpp" line="3264"/>
+        <location filename="../settingswidget.cpp" line="3291"/>
         <source>Do you want to proceed?</source>
         <translation>Θέλετε να συνεχίσετε;</translation>
     </message>
