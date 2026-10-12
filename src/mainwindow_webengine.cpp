@@ -1173,11 +1173,18 @@ void MainWindow::checkMediaCodecs() {
   if (m_codecCheckDone || !m_webEngine || !m_webEngine->page())
     return;
   m_codecCheckDone = true; // run the probe at most once per session
-  if (SettingsManager::instance()
-          .settings()
-          .value("mediaCodecNoticeShown", false)
-          .toBool())
-    return; // already told the user once
+  auto &settings = SettingsManager::instance().settings();
+  const bool codecNoticeShown =
+      settings.value("mediaCodecNoticeShown", false).toBool();
+  // WhatsApp greys out calls for a Chrome newer than it lists, and the default
+  // user agent follows the installed Chromium, so Qt 6.11 already reports 140
+  // where 130 still gets the call buttons (#97). Told once, like the codecs.
+  const bool callsUaNoticeDue =
+      !settings.value("callsUserAgentNoticeShown", false).toBool() &&
+      chromeMajorVersion(m_webEngine->page()->profile()->httpUserAgent()) >
+          kLastChromeWithCalls;
+  if (codecNoticeShown && !callsUaNoticeDue)
+    return; // nothing left to tell
 
   // Ask the engine whether it can play H.264 (what WhatsApp needs for MP4).
   m_webEngine->page()->runJavaScript(
@@ -1185,10 +1192,30 @@ void MainWindow::checkMediaCodecs() {
           "(function(){try{var v=document.createElement('video');"
           "return v.canPlayType('video/mp4; codecs=\"avc1.42E01E\"')||'';}"
           "catch(e){return 'err';}})();"),
-      [this](const QVariant &v) {
+      [this, codecNoticeShown, callsUaNoticeDue](const QVariant &v) {
         const QString r = v.toString();
-        if (r != QLatin1String("")) // supported (or probe failed): no notice
+        if (r != QLatin1String("")) { // supported (or probe failed)
+          // Only an engine that can make calls is worth pointing at the user
+          // agent: without the codecs the notice below already says calls fail.
+          if (!callsUaNoticeDue || !m_webEngine || !m_webEngine->page())
+            return;
+          SettingsManager::instance().settings().setValue(
+              "callsUserAgentNoticeShown", true);
+          const int reported = chromeMajorVersion(
+              m_webEngine->page()->profile()->httpUserAgent());
+          const QString text =
+              tr("WhatsApp greys out voice and video calls for the Chrome "
+                 "version this user agent reports (%1). To get them back, set "
+                 "the user agent in Settings to one that reports Chrome %2. "
+                 "(Click to dismiss.)")
+                  .arg(reported)
+                  .arg(kLastChromeWithCalls);
+          m_webEngine->page()->runJavaScript(
+              Translate::toastScript(text, /*persistent=*/true));
           return;
+        }
+        if (codecNoticeShown)
+          return; // already told the user once
         SettingsManager::instance().settings().setValue("mediaCodecNoticeShown",
                                                         true);
         if (!m_webEngine || !m_webEngine->page())

@@ -151,6 +151,12 @@ QString accountTabTooltipText(const QString &version, const QString &token) {
   return lines.join(QLatin1Char('\n'));
 }
 
+int chromeMajorVersion(const QString &userAgent) {
+  static const QRegularExpression chrome(QStringLiteral("\\bChrome/(\\d+)"));
+  const QRegularExpressionMatch m = chrome.match(userAgent);
+  return m.hasMatch() ? m.captured(1).toInt() : 0;
+}
+
 QString inviteCodeFromUrl(const QString &url) {
   const QString u = url.trimmed();
   // A web invite link: https://chat.whatsapp.com/<code> (older links carry an

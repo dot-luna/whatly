@@ -1673,6 +1673,22 @@ private slots:
              QString());
     QCOMPARE(inviteCodeFromUrl(QString()), QString());
   }
+
+  // The Chrome version a user agent claims, which decides whether WhatsApp
+  // offers calls (#97). HeadlessChrome and Chromium tokens are not it.
+  void chromeMajor() {
+    QCOMPARE(chromeMajorVersion(QStringLiteral(
+                 "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, "
+                 "like Gecko) Chrome/140.0.0.0 Safari/537.36")),
+             140);
+    QCOMPARE(chromeMajorVersion(defaultUserAgentStr), kLastChromeWithCalls);
+    QCOMPARE(chromeMajorVersion(QStringLiteral("HeadlessChrome/120.0")), 0);
+    QCOMPARE(chromeMajorVersion(QStringLiteral(
+                 "Mozilla/5.0 (X11; Linux x86_64; rv:131.0) Gecko/20100101 "
+                 "Firefox/131.0")),
+             0);
+    QCOMPARE(chromeMajorVersion(QString()), 0);
+  }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
