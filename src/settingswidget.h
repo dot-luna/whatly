@@ -94,6 +94,9 @@ public slots:
   // keyboard both do it — and an open Settings page went on showing the count it
   // had ("3 languages") while one of those three was doing the work.
   void updateSpellCheckSummary();
+  // The embedded settings page uses the same validated dictionary actions as
+  // the native picker, without synthesizing mouse events or exposing slots.
+  bool activateDictionaryAction(int row);
 protected slots:
   bool eventFilter(QObject *obj, QEvent *event);
   void closeEvent(QCloseEvent *event);

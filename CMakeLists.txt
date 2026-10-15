@@ -173,6 +173,8 @@ set(SOURCES
     src/debuglog.cpp
     src/downloadmanagerwidget.cpp
     src/downloadwidget.cpp
+    src/embeddedsettingsbridge.cpp
+    src/embeddedsettingsview.cpp
     src/linkeddevicename.cpp
     src/mediastuck.cpp
     src/lock.cpp
@@ -269,6 +271,8 @@ set(HEADERS
     src/def.h
     src/downloadmanagerwidget.h
     src/downloadwidget.h
+    src/embeddedsettingsbridge.h
+    src/embeddedsettingsview.h
     src/linkeddevicename.h
     src/mediastuck.h
     src/lock.h

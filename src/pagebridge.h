@@ -33,8 +33,7 @@ public slots:
   // conversation, so MainWindow can evaluate the rules and reply.
   void incomingMessage(const QString &text) { emit incomingMessageReceived(text); }
 
-  // Invoked by the floating gear injected when there is no system tray, so
-  // Settings is reachable without the tray menu (issue #103).
+  // Open the same embedded settings navigation used by keyboard and tray actions.
   void openSettings() { emit settingsRequested(); }
 
 signals:

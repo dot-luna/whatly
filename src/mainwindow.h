@@ -19,6 +19,7 @@ class ScheduledMessages;
 class DetachedAccountWindow;
 class AccountTabBar;
 class LocalApiServer;
+class EmbeddedSettingsView;
 
 #include "messaging.h"
 
@@ -570,6 +571,9 @@ private:
   class UpdateChecker *m_updateChecker = nullptr;
   QString m_pendingUpdateUrl;
   void initSettingWidget();
+  void updateEmbeddedSettings(QWebEnginePage *page, const QVariantMap &state,
+                              bool fromApplication = false);
+  void closeEmbeddedSettings();
   void tryLock();
   void ensureLockVisible();
   void checkLoadedCorrectly();
@@ -584,9 +588,6 @@ private:
                             const QString &caption);
   // The page-side script that completes an attachment send (injected on load).
   static QString attachmentSenderScriptSource();
-  // The floating gear injected when there is no system tray, so Settings stays
-  // reachable (issue #103). Its label reuses the already-translated "Settings".
-  static QString settingsAffordanceScript();
   // Send text to a contact/group given by name (or a group id) through WhatsApp
   // Web: opens the target chat by exact-title search, then types and sends.
   // Used by commandSend for a non-phone-number recipient. Best-effort.
@@ -705,7 +706,9 @@ private:
   qint64 m_lastDeactivationMs = 0;
   QWebEngineView *m_webEngine = nullptr;
   PageBridge *m_pageBridge = nullptr;
-  QWebChannel *m_webChannel = nullptr;
+  QPointer<EmbeddedSettingsView> m_embeddedSettings;
+  QPointer<QWebEnginePage> m_settingsSourcePage;
+  bool m_settingsFillsAccountView = false;
   ScheduledMessages *m_scheduledMessages = nullptr;
   LocalApiServer *m_localApi = nullptr;
   SettingsWidget *m_settingsWidget = nullptr;

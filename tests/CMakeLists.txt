@@ -1,7 +1,6 @@
-# Unit tests (QtTest). Built only when -DWHATLY_TESTS=ON. Kept lightweight: they
-# link just the code under test and its direct dependencies, not the whole app
-# (no MainWindow, no WebEngine instances), so they build and run fast and
-# headless (offscreen).
+# Qt tests, built only when -DWHATLY_TESTS=ON. Logic and asset targets link their
+# direct dependencies; settings tests link the app sources and the embedded
+# settings target also exercises real WebEngine views. All run headlessly.
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test Widgets Gui Svg
              WebEngineCore WebEngineWidgets WebChannel Positioning Network)
 if(UNIX AND NOT APPLE)
@@ -102,3 +101,27 @@ endif()
 add_test(NAME settings COMMAND tst_settings)
 set_tests_properties(settings PROPERTIES ENVIRONMENT
     "QT_QPA_PLATFORM=offscreen;QTWEBENGINE_CHROMIUM_FLAGS=--no-sandbox --disable-gpu;WHATLY_SETTINGS_APP=whatly-test")
+
+# Exercise the actual settings handlers and the bundled web form together.
+# This target uses isolated settings and never navigates to WhatsApp.
+add_executable(tst_embeddedsettingsbridge tst_embeddedsettingsbridge.cpp ${_app_srcs})
+target_include_directories(tst_embeddedsettingsbridge PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/src/singleapplication
+    ${CMAKE_SOURCE_DIR}/src/widgets/elidedlabel
+    ${CMAKE_SOURCE_DIR}/src/widgets/scrolltext
+    ${CMAKE_SOURCE_DIR}/src/widgets/MoreApps
+    ${CMAKE_BINARY_DIR})
+target_compile_definitions(tst_embeddedsettingsbridge PRIVATE ${TEST_DEFS} QAPPLICATION_CLASS=QApplication)
+target_link_libraries(tst_embeddedsettingsbridge PRIVATE
+    Qt${QT_VERSION_MAJOR}::Test Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::WebEngineWidgets
+    Qt${QT_VERSION_MAJOR}::WebChannel Qt${QT_VERSION_MAJOR}::Positioning
+    Qt${QT_VERSION_MAJOR}::Network Qt${QT_VERSION_MAJOR}::Svg)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(tst_embeddedsettingsbridge PRIVATE notify-qt X11 xcb Qt${QT_VERSION_MAJOR}::DBus)
+endif()
+add_test(NAME embedded_settings COMMAND tst_embeddedsettingsbridge)
+set_tests_properties(embedded_settings PROPERTIES ENVIRONMENT
+    "QT_QPA_PLATFORM=offscreen;QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu;WHATLY_SETTINGS_APP=whatly-embedded-test"
+    TIMEOUT 90)

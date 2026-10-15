@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Settings navigation fixture</title>
+    <style>
+        html, body { margin: 0; background: #fff; color: #111b21; font: 15px Arial, sans-serif; }
+        #app { display: flex; width: min(1180px, 100vw); height: 640px; background: #fff; }
+        #rail { flex: 0 0 64px; background: #f0f2f5; display: flex; flex-direction: column; justify-content: flex-end; }
+        #rail button { width: 48px; height: 48px; margin: 4px 8px; border: 0; }
+        #settings-column { flex: 0 0 320px; min-width: 0; overflow-y: auto; background: #fff; }
+        h1 { padding: 20px 24px; margin: 0; font-size: 24px; }
+        #settings-list { display: flex; flex-direction: column; }
+        .native-row { display: flex; align-items: center; width: 100%; min-height: 60px; padding: 14px 24px; gap: 24px; border: 0; background: transparent; color: inherit; font: inherit; }
+        .native-row [data-icon] { display: inline-block; width: 24px; height: 24px; }
+        #logout-row { color: #d70032; }
+        #main { flex: 1; min-width: 0; background: #f7f9fa; }
+        #app.narrow { width: 440px; max-width: 100vw; }
+        #app.narrow #settings-column { flex: 1; }
+        #app.narrow #main { display: none; }
+        html.dark body, html.dark #app, html.dark #settings-column { background: #111b21; color: #e9edef; }
+        #results { white-space: pre-wrap; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <nav id="rail">
+            <button id="settings-nav" aria-label="Einstellungen" aria-pressed="true"><span data-icon="settings-refreshed">⚙</span></button>
+            <button id="profile-nav" aria-label="Profile">P</button>
+        </nav>
+        <section id="settings-column">
+            <h1>Einstellungen</h1>
+            <div id="settings-list" data-testid="settings-list">
+                <button class="native-row" id="account-row"><span data-icon="account">A</span><span>Konto</span></button>
+                <button class="native-row" id="privacy-row"><span data-icon="privacy">P</span><span>Datenschutz</span></button>
+                <button class="native-row" id="logout-row"><span data-icon="exit">X</span><span>Abmelden</span></button>
+            </div>
+        </section>
+        <main id="main"><div id="native-content">Native content stays mounted.</div></main>
+    </div>
+    <pre id="results">Running navigation tests…</pre>
+    <script>
+        // Synthetic layout only: no WhatsApp session, messages, settings values,
+        // backend, or network services are needed by these behavior tests.
+        window.testResults = [];
+        window.testDone = false;
+        window.panelStates = [];
+        window.__whatlySettingsHost = { updatePanel(state) { window.panelStates.push(structuredClone(state)); } };
+        window.fixtureMarkup = document.getElementById('app').innerHTML;
+    </script>
+    <script src="../../src/web/settings-navigation.js"></script>
+    <script>
+        const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+        const near = (left, right) => Math.abs(left - right) < 1;
+        const check = (name, condition) => {
+            window.testResults.push({ name, passed: Boolean(condition) });
+            if (!condition) throw new Error(name);
+        };
+        const lastState = () => window.panelStates.at(-1);
+        const app = document.getElementById('app');
+        const api = window.__whatlySettingsNavigation;
+
+        function restore() {
+            api.close();
+            app.removeAttribute('dir');
+            app.className = '';
+            app.innerHTML = window.fixtureMarkup;
+            document.getElementById('profile-nav').onclick = () => {
+                document.getElementById('settings-nav').setAttribute('aria-pressed', 'false');
+                document.getElementById('settings-column').style.display = 'none';
+            };
+            api.refresh();
+        }
+
+        (async function () {
+            try {
+                restore();
+                check('inserts exactly one native settings-list row before localized logout',
+                    document.querySelectorAll('#whatly-settings-row').length === 1 &&
+                    document.getElementById('whatly-settings-row').nextElementSibling.id === 'logout-row');
+                check('does not add any floating settings control', !document.getElementById('whatly-settings-fab'));
+                const native = document.getElementById('native-content');
+                check('opens through public API', api.open());
+                const mainRect = document.getElementById('main').getBoundingClientRect();
+                check('reports right pane in CSS coordinates', lastState().visible &&
+                    near(lastState().x, mainRect.x) && near(lastState().width, mainRect.width) &&
+                    lastState().viewportWidth === innerWidth);
+                check('keeps native page content and only mounts an empty placeholder',
+                    native.isConnected && document.getElementById('whatly-settings-placeholder').childElementCount === 0);
+                api.refresh();
+                const count = window.panelStates.length;
+                await wait(1300);
+                check('idle observation does not repeatedly report identical geometry', window.panelStates.length === count);
+                document.getElementById('profile-nav').click();
+                check('profile navigation closes and restores the native content', !lastState().visible &&
+                    !document.getElementById('whatly-settings-placeholder') && native.isConnected);
+
+                restore();
+                document.getElementById('whatly-settings-row').click();
+                check('settings row opens the panel', lastState().visible);
+                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+                check('Escape closes the panel', !lastState().visible && !document.getElementById('whatly-settings-placeholder'));
+                const closedEscape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+                document.dispatchEvent(closedEscape);
+                check('Escape is untouched while panel is closed', !closedEscape.defaultPrevented);
+
+                restore();
+                api.open();
+                document.getElementById('settings-column').innerHTML = new DOMParser()
+                    .parseFromString(window.fixtureMarkup, 'text/html').getElementById('settings-column').innerHTML;
+                await wait(300);
+                check('WhatsApp remount closes panel and reinstalls a single list entry', !lastState().visible &&
+                    document.querySelectorAll('#whatly-settings-row').length === 1);
+
+                restore();
+                app.setAttribute('dir', 'rtl');
+                api.open();
+                const rtlRect = document.getElementById('main').getBoundingClientRect();
+                check('right-to-left layout uses the content pane on the opposite side', lastState().visible &&
+                    near(lastState().x, rtlRect.x) && near(lastState().width, rtlRect.width));
+
+                restore();
+                app.classList.add('narrow');
+                api.open();
+                const rail = document.getElementById('rail').getBoundingClientRect();
+                check('narrow layout keeps native navigation rail uncovered', lastState().visible &&
+                    lastState().x >= rail.right - 1 && lastState().x + lastState().width <= app.getBoundingClientRect().right + 1);
+                app.classList.remove('narrow');
+                window.dispatchEvent(new Event('resize'));
+                await wait(200);
+                check('resize updates geometry for wider right pane', near(lastState().x, document.getElementById('main').getBoundingClientRect().x));
+
+                restore();
+                document.documentElement.classList.add('dark');
+                api.open();
+                check('reports page appearance without any settings values', lastState().appearance.mode === 'dark' &&
+                    lastState().appearance.background === 'rgb(17, 27, 33)' &&
+                    Object.keys(lastState()).sort().join(',') === 'appearance,height,viewportHeight,viewportWidth,visible,width,x,y');
+                document.documentElement.classList.remove('dark');
+
+                restore();
+                delete window.__whatlySettingsHost;
+                api.open();
+                await wait(180);
+                window.__whatlySettingsHost = { updatePanel(state) { window.panelStates.push(structuredClone(state)); } };
+                await wait(180);
+                check('delayed native host receives pending geometry', lastState().visible);
+
+                restore();
+                document.getElementById('settings-column').style.display = 'none';
+                document.getElementById('settings-nav').setAttribute('aria-pressed', 'false');
+                api.refresh();
+                document.getElementById('settings-nav').onclick = () => setTimeout(() => {
+                    document.getElementById('settings-column').style.display = '';
+                    document.getElementById('settings-nav').setAttribute('aria-pressed', 'true');
+                }, 200);
+                check('shortcut initiates native settings navigation', api.open());
+                await wait(600);
+                check('shortcut waits for native settings mount before opening', lastState().visible);
+
+                restore();
+                document.getElementById('logout-row').querySelector('[data-icon]').remove();
+                api.refresh();
+                check('localized label fallback works when logout icon is absent',
+                    document.getElementById('whatly-settings-row').nextElementSibling.id === 'logout-row');
+
+                restore();
+                document.getElementById('logout-row').querySelector('[data-icon]').setAttribute('data-icon', 'wds-ic-logout');
+                api.refresh();
+                check('recognizes prefixed semantic logout icons',
+                    document.getElementById('whatly-settings-row').nextElementSibling.id === 'logout-row');
+
+                restore();
+                document.getElementById('settings-column').style.display = 'none';
+                document.getElementById('settings-nav').setAttribute('aria-pressed', 'false');
+                api.refresh();
+                api.open();
+                await wait(4400);
+                check('unavailable native settings navigation times out with an inline explanation',
+                    !document.getElementById('whatly-settings-placeholder') &&
+                    document.getElementById('whatly-settings-status').textContent.includes('Open WhatsApp Settings'));
+
+                restore();
+                delete window.__whatlySettingsHost;
+                api.open();
+                await wait(5400);
+                check('unavailable native host times out without leaving a blank panel',
+                    !document.getElementById('whatly-settings-placeholder') &&
+                    document.getElementById('whatly-settings-status').textContent.includes('not ready'));
+                window.__whatlySettingsHost = { updatePanel(state) { window.panelStates.push(structuredClone(state)); } };
+
+                restore();
+                document.getElementById('settings-column').remove();
+                document.getElementById('settings-nav').remove();
+                api.refresh();
+                check('signed-out or incompatible layout returns false without floating fallback', api.open() === false &&
+                    !document.getElementById('whatly-settings-placeholder'));
+                const dialog = document.createElement('div');
+                dialog.setAttribute('role', 'dialog');
+                dialog.innerHTML = '<button class="native-row"><span data-icon="exit">X</span><span>Log out</span></button><button class="native-row">Cancel</button>';
+                app.appendChild(dialog);
+                api.refresh();
+                check('does not inject into logout confirmation dialog', !document.getElementById('whatly-settings-row'));
+
+                restore();
+                api.open();
+                window.dispatchEvent(new PopStateEvent('popstate'));
+                check('native browser back closes panel', !lastState().visible);
+            } catch (error) {
+                window.testError = error.stack || String(error);
+            } finally {
+                api.close();
+                window.testDone = true;
+                document.getElementById('results').textContent = JSON.stringify({ results: window.testResults, error: window.testError }, null, 2);
+            }
+        })();
+    </script>
+</body>
+</html>

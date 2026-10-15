@@ -2,6 +2,7 @@
 // zoom, and navigation helpers.
 // WebEngine, tray, and lock logic live in mainwindow_webengine/tray/lock.cpp.
 #include "mainwindow.h"
+#include "embeddedsettingsview.h"
 #include "appprofile.h"
 
 #include <algorithm>
@@ -1022,21 +1023,57 @@ void MainWindow::showSettings(bool isAskedByCLI) {
                        tr("Unlock to access Settings."));
     return;
   }
-  if (m_webEngine == nullptr) {
+  const int accountIndex = focusedAccountIndex();
+  if (accountIndex < 0 || accountIndex >= m_accounts.size() ||
+      !m_accounts[accountIndex].view) {
     QMessageBox::critical(
         this, QApplication::applicationDisplayName() + tr("| Error"),
         tr("Unable to initialize settings module.\nWebengine is not initialized."));
     return;
   }
-  if (!m_settingsWidget->isVisible()) {
-    updateSettingsUserAgentWidget();
-    m_settingsWidget->refresh();
-    QRect screenRect = screen()->geometry();
-    if (!screenRect.contains(m_settingsWidget->pos()))
-      m_settingsWidget->move(screenRect.center() -
-                             m_settingsWidget->rect().center());
-    m_settingsWidget->show();
+  ensureAccountLoaded(accountIndex);
+  const QPointer<WebView> sourceView = m_accounts[accountIndex].view;
+  const QPointer<QWebEnginePage> source = pageOf(m_accounts[accountIndex]);
+  if (!source)
+    return;
+
+  // Keyboard, tray and CLI entry points follow the focused account, including
+  // detached windows. A hidden account must be visible for its child form.
+  if (m_settingsSourcePage && m_settingsSourcePage != source)
+    closeEmbeddedSettings();
+  bringForward(sourceView->window());
+  if (m_settingsSourcePage == source && m_embeddedSettings &&
+      m_embeddedSettings->isVisible()) {
+    m_embeddedSettings->setFocus(Qt::OtherFocusReason);
+    return;
   }
+  sourceView->setFocus(Qt::OtherFocusReason);
+  source->runJavaScript(QStringLiteral(
+      "window.__whatlySettingsNavigation && window.__whatlySettingsNavigation.open();"),
+      [guard = QPointer<MainWindow>(this), source, sourceView](const QVariant &opened) {
+        if (!guard || opened.toBool() || !source || !sourceView ||
+            !sourceView->isVisible())
+          return;
+        const int index = guard->accountIndexForView(sourceView);
+        if (index < 0 || guard->pageOf(guard->m_accounts[index]) != source)
+          return;
+        // Settings must remain reachable before linking an account or when the
+        // website cannot load. The shortcut uses the same embedded form, filling
+        // the account view until its own Back button returns to WhatsApp.
+        const double zoom = sourceView->zoomFactor();
+        const double width = sourceView->width() / zoom;
+        const double height = sourceView->height() / zoom;
+        const bool dark = SettingsManager::instance().settings()
+                              .value(QStringLiteral("windowTheme"), "light") == "dark";
+        guard->updateEmbeddedSettings(source,
+            {{QStringLiteral("visible"), true},
+             {QStringLiteral("x"), 0}, {QStringLiteral("y"), 0},
+             {QStringLiteral("width"), width}, {QStringLiteral("height"), height},
+             {QStringLiteral("viewportWidth"), width}, {QStringLiteral("viewportHeight"), height},
+             {QStringLiteral("appearance"), QVariantMap{
+                 {QStringLiteral("mode"), dark ? "dark" : "light"},
+                 {QStringLiteral("fontFamily"), qApp->font().family()}}}}, true);
+      });
 }
 
 void MainWindow::updateSettingsUserAgentWidget() {
@@ -1677,6 +1714,9 @@ void MainWindow::restartApp() {
 
   if (m_settingsWidget)
     m_settingsWidget->saveUiState();
+  SettingsManager::instance().settings().setValue(
+      QStringLiteral("ui/settingsWasOpen"),
+      m_embeddedSettings && m_embeddedSettings->isVisible());
   saveWindowLayout();
   SettingsManager::instance().settings().sync(); // the new process reads these
 

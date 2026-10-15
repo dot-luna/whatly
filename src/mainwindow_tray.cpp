@@ -471,16 +471,6 @@ void MainWindow::createTrayIcon() {
     if (m_windowsMenu && m_windowsMenu->actions().contains(action))
       return;
     raiseWindow();
-    // Settings opens a window of its own, and raising the main window above it
-    // is worse than not raising anything: the page you asked for ends up behind
-    // and without the keyboard. Put it back on top once this menu has unwound.
-    if (action == m_settingsAction)
-      QTimer::singleShot(0, this, [this]() {
-        if (m_settingsWidget && m_settingsWidget->isVisible()) {
-          m_settingsWidget->raise();
-          m_settingsWidget->activateWindow();
-        }
-      });
   });
 
   m_systemTrayIcon = new QSystemTrayIcon(m_trayIconNormal, this);

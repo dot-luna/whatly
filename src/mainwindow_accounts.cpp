@@ -2,6 +2,7 @@
 // in account. The tab bar hides itself when only the default account exists, so
 // a single-account setup is untouched by any of this.
 #include "mainwindow.h"
+#include "embeddedsettingsview.h"
 
 #include <QDebug>
 #include <QEvent>
@@ -592,6 +593,14 @@ void MainWindow::syncGridContainerSize() {
 }
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
+  // The pre-login/offline form fills the view and has no page-side geometry
+  // observer. Keep it aligned when the account container changes size.
+  if (m_embeddedSettings && watched == m_embeddedSettings->parentWidget()) {
+    if (event->type() == QEvent::Resize && m_settingsFillsAccountView)
+      m_embeddedSettings->setGeometry(m_embeddedSettings->parentWidget()->rect());
+    else if (event->type() == QEvent::Hide)
+      closeEmbeddedSettings();
+  }
   if (m_gridScroll && watched == m_gridScroll->viewport() &&
       event->type() == QEvent::Resize)
     syncGridContainerSize();
@@ -862,6 +871,9 @@ void MainWindow::setActiveAccount(int index) {
     return;
   if (m_accounts[index].window)
     return; // detached: it lives in its own window, not the main strip/stack
+  if (m_webEngine != m_accounts[index].view && m_embeddedSettings &&
+      m_embeddedSettings->parentWidget() == m_webEngine)
+    closeEmbeddedSettings();
   // The account we are leaving starts its idle clock now.
   if (m_activeAccount >= 0 && m_activeAccount < m_accounts.size())
     m_accounts[m_activeAccount].lastActive = QDateTime::currentDateTime();
@@ -938,6 +950,17 @@ int MainWindow::accountIndexForId(const QString &id) const {
 }
 
 int MainWindow::focusedAccountIndex() const {
+  // In grid mode several account views are visible at once. The focused
+  // renderer (or its embedded settings child) identifies the intended tile.
+  if (const QWidget *focused = QApplication::focusWidget()) {
+    for (int i = 0; i < m_accounts.size(); ++i) {
+      const WebView *view = m_accounts[i].view;
+      if (view && view->isVisible() &&
+          (view == focused || view->isAncestorOf(focused)))
+        return i;
+    }
+  }
+
   // A detached window shows whatever its own stack is on. Its tab strip swaps
   // that stack directly and never sets m_activeAccount, so for any window other
   // than this one the app-wide "active" account is simply the wrong answer.
@@ -1196,6 +1219,8 @@ void MainWindow::unloadAccount(int index) {
   if (!a.loaded || !a.view)
     return;
   QWebEnginePage *page = a.view->page();
+  if (m_settingsSourcePage == page)
+    closeEmbeddedSettings();
   // Cleared before the page goes, so anything reached during teardown sees a
   // dormant account and cannot ask for the page being destroyed.
   a.loaded = false;

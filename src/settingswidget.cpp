@@ -508,9 +508,11 @@ SettingsWidget::SettingsWidget(QWidget *parent, int screenNumber,
     // A second "Restart now", for a section that has one setting needing a
     // restart rather than a run of them. Same words and same tooltip as the
     // button in the .ui, so there is nothing extra to translate.
-    const auto restartButton = [this]() {
+    int embeddedRestartIndex = 0;
+    const auto restartButton = [this, &embeddedRestartIndex]() {
       auto *b = new QPushButton(ui->restartNowButton->text(), this);
       b->setToolTip(ui->restartNowButton->toolTip());
+      b->setObjectName(QStringLiteral("embeddedRestart%1").arg(embeddedRestartIndex++));
       b->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
       connect(b, &QPushButton::clicked, this,
               &SettingsWidget::restartRequested);
@@ -857,6 +859,7 @@ SettingsWidget::SettingsWidget(QWidget *parent, int screenNumber,
     // Off by default and injected only while on, so it costs nothing otherwise.
     if (ui->verticalLayoutPerformance) {
       auto *diag = new QCheckBox(tr("Collect scroll diagnostics"), this);
+      diag->setObjectName(QStringLiteral("collectDiagnosticsCheckBox"));
       diag->setToolTip(
           tr("Records how smoothly the chat scrolls, to attach to a bug "
              "report. Off by default; it does nothing until you turn it on, "
@@ -869,6 +872,7 @@ SettingsWidget::SettingsWidget(QWidget *parent, int screenNumber,
       ui->verticalLayoutPerformance->addWidget(diag);
 
       auto *copyDiag = new QPushButton(tr("Copy diagnostics"), this);
+      copyDiag->setObjectName(QStringLiteral("copyDiagnosticsButton"));
       copyDiag->setToolTip(
           tr("Copy the collected scroll figures to the clipboard (and the log) "
              "so they can be pasted into a bug report."));
@@ -1189,6 +1193,7 @@ void SettingsWidget::loadShortcuts() {
   for (const Shortcuts::Def &d : Shortcuts::registered()) {
     auto *edit = new QKeySequenceEdit(Shortcuts::get(d.id), host);
     const QString id = d.id;
+    edit->setObjectName(QStringLiteral("shortcut/") + id);
     connect(edit, &QKeySequenceEdit::editingFinished, this, [this, edit, id]() {
       const QKeySequence seq = edit->keySequence();
       const QString clash = Shortcuts::conflictId(id, seq);
@@ -2852,6 +2857,31 @@ void SettingsWidget::deleteDictionary(const QString &code) {
     return;
   populateSpellCheck();
   emit spellCheckChanged();
+}
+
+bool SettingsWidget::activateDictionaryAction(int row) {
+  if (!m_spellRows || row < 0 || row >= m_spellRows->rowCount())
+    return false;
+  const QModelIndex index = m_spellRows->index(row, 0);
+  const QString code = index.data(DictionaryRows::CodeRole).toString();
+  if (code.isEmpty()) {
+    m_dictCatalogTries = 0;
+    fetchDictionaryCatalog();
+    return true;
+  }
+  if (index.data(DictionaryRows::ProgressRole).toInt() >= 0)
+    return false;
+  const auto action = static_cast<DictionaryRows::Action>(
+      index.data(DictionaryRows::ActionRole).toInt());
+  if (action == DictionaryRows::Action::Download) {
+    downloadDictionary(code);
+    return true;
+  }
+  if (action == DictionaryRows::Action::Delete) {
+    deleteDictionary(code);
+    return true;
+  }
+  return false;
 }
 
 // The combo shows a summary of what is checked rather than one entry's text.

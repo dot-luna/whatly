@@ -4,4 +4,10 @@
   <qresource prefix="/scripts">
     <file alias="scroll-smoothness-probe.js">../debug/scroll-smoothness-probe.js</file>
   </qresource>
+  <qresource prefix="/whatly/settings">
+    <file alias="settings.html">web/settings.html</file>
+    <file alias="settings.css">web/settings.css</file>
+    <file alias="settings.js">web/settings.js</file>
+    <file alias="settings-navigation.js">web/settings-navigation.js</file>
+  </qresource>
 </RCC>

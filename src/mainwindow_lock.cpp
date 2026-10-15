@@ -1,5 +1,6 @@
 // App lock, auto-lock, and session-logout helpers.
 #include "mainwindow.h"
+#include "embeddedsettingsview.h"
 #include "screenlock.h"
 
 #include "common.h"
@@ -15,7 +16,7 @@ void MainWindow::initAutoLock() {
       1000);
   connect(m_autoLockEventFilter, &AutoLockEventFilter::autoLockTimerTimeout,
           this, [=]() {
-            if ((m_settingsWidget && !m_settingsWidget->isVisible()) &&
+            if ((!m_embeddedSettings || !m_embeddedSettings->isVisible()) &&
                 SettingsManager::instance()
                     .settings()
                     .value("appAutoLocking", defaultAppAutoLock)
@@ -76,6 +77,7 @@ void MainWindow::initLock() {
   QApplication::processEvents();
 
   if (SettingsManager::instance().settings().value("lockscreen").toBool()) {
+    closeEmbeddedSettings();
     if (SettingsManager::instance().settings().value("asdfg").isValid()) {
       m_lockWidget->lock_app();
     } else {
@@ -98,6 +100,7 @@ void MainWindow::initLock() {
 void MainWindow::ensureLockVisible() {
   if (!m_lockWidget || !m_lockWidget->getIsLocked())
     return;
+  closeEmbeddedSettings();
   if (centralWidget())
     m_lockWidget->setGeometry(centralWidget()->rect());
   m_lockWidget->show();

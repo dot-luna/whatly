@@ -1,5 +1,8 @@
 // WebEngine page/profile lifecycle, reload, download, and page-theme handling.
 #include "mainwindow.h"
+#include "embeddedsettingsview.h"
+
+#include <cmath>
 
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
@@ -166,9 +169,103 @@ void MainWindow::createPageFor(WebView *view, const QString &accountId) {
   }
 }
 
-// Buttons Whatly injects into WhatsApp's own UI need a way back into the app.
-// QWebChannel is that way: it exposes exactly one object, with exactly the slots
-// PageBridge declares — the page can reach nothing else.
+// Dismiss the child view and its page-side placeholder together so navigation
+// never leaves an invisible input-catching panel over a conversation.
+void MainWindow::closeEmbeddedSettings() {
+  if (m_embeddedSettings)
+    m_embeddedSettings->hide();
+  m_settingsFillsAccountView = false;
+  const QPointer<QWebEnginePage> source = m_settingsSourcePage;
+  m_settingsSourcePage = nullptr;
+  if (source)
+    source->runJavaScript(QStringLiteral(
+        "window.__whatlySettingsNavigation && window.__whatlySettingsNavigation.close();"));
+}
+
+void MainWindow::updateEmbeddedSettings(QWebEnginePage *page,
+                                       const QVariantMap &state,
+                                       bool fromApplication) {
+  if (!page || !m_settingsWidget)
+    return;
+  if (!state.value(QStringLiteral("visible")).toBool()) {
+    if (m_settingsSourcePage == page)
+      closeEmbeddedSettings();
+    return;
+  }
+
+  // Detached windows and grid tiles do not share m_webEngine. Resolve only
+  // loaded account pages, without creating a page for a dormant account.
+  WebView *sourceView = nullptr;
+  for (const Account &account : m_accounts) {
+    if (pageOf(account) == page) {
+      sourceView = account.view;
+      break;
+    }
+  }
+  if (!sourceView || !sourceView->isVisible() ||
+      sourceView->window()->isMinimized())
+    return;
+  const QWidget *focused = QApplication::focusWidget();
+  if (m_settingsSourcePage != page &&
+      (!focused || (focused != sourceView && !sourceView->isAncestorOf(focused))))
+    return;
+  if ((m_lockWidget && m_lockWidget->getIsLocked()) ||
+      (!fromApplication && (page->url().scheme() != QLatin1String("https") ||
+                            page->url().host() != QLatin1String("web.whatsapp.com"))))
+    return;
+
+  // The page reports CSS pixels. Qt's child-widget geometry uses device-
+  // independent pixels; page zoom is the only scale between those spaces.
+  double values[6];
+  const char *keys[] = {"x", "y", "width", "height", "viewportWidth", "viewportHeight"};
+  for (int i = 0; i < 6; ++i) {
+    bool ok = false;
+    values[i] = state.value(QLatin1String(keys[i])).toDouble(&ok);
+    if (!ok || !std::isfinite(values[i]) || values[i] < 0 || values[i] > 100000)
+      return;
+  }
+  if (values[2] < 120 || values[3] < 100 ||
+      values[0] + values[2] > values[4] + 2 ||
+      values[1] + values[3] > values[5] + 2)
+    return;
+  const double zoom = sourceView->zoomFactor();
+  const QRect rect = QRect(qRound(values[0] * zoom), qRound(values[1] * zoom),
+                           qRound(values[2] * zoom), qRound(values[3] * zoom))
+                         .intersected(sourceView->rect());
+  if (rect.width() < 120 || rect.height() < 100)
+    return;
+
+  // Close the former page's placeholder before moving the private form. A
+  // delayed report from that page must not reclaim a newly focused account.
+  if (m_settingsSourcePage && m_settingsSourcePage != page)
+    closeEmbeddedSettings();
+  if (m_embeddedSettings && m_embeddedSettings->parentWidget() != sourceView)
+    delete m_embeddedSettings;
+  const bool opening = !m_embeddedSettings || !m_embeddedSettings->isVisible();
+  if (!m_embeddedSettings) {
+    m_embeddedSettings = new EmbeddedSettingsView(m_settingsWidget, sourceView);
+    connect(m_embeddedSettings, &EmbeddedSettingsView::closeRequested, this,
+            [this, source = QPointer<WebView>(sourceView)]() {
+              closeEmbeddedSettings();
+              if (source && source->isVisible())
+                source->setFocus();
+            });
+  }
+  if (opening) {
+    m_settingsWidget->updateDefaultUAButton(page->profile()->httpUserAgent());
+    m_settingsWidget->refresh();
+    m_embeddedSettings->refreshSettings();
+  }
+  m_settingsSourcePage = page;
+  m_settingsFillsAccountView = fromApplication;
+  m_embeddedSettings->setGeometry(rect);
+  m_embeddedSettings->setAppearance(state.value(QStringLiteral("appearance")).toMap());
+  m_embeddedSettings->show();
+  m_embeddedSettings->raise();
+  if (opening)
+    m_embeddedSettings->setFocus();
+}
+
 void MainWindow::installPageBridge(QWebEnginePage *page) {
   if (!m_pageBridge) {
     m_pageBridge = new PageBridge(this);
@@ -194,11 +291,22 @@ void MainWindow::installPageBridge(QWebEnginePage *page) {
     connect(m_pageBridge, &PageBridge::settingsRequested, this,
             [this]() { showSettings(); });
   }
-  if (!m_webChannel) {
-    m_webChannel = new QWebChannel(this);
-    m_webChannel->registerObject(QStringLiteral("whatlyBridge"), m_pageBridge);
-  }
-  page->setWebChannel(m_webChannel);
+  // Each account gets its own geometry channel, so a background account cannot
+  // dismiss or reposition the active account's settings. Settings values never
+  // cross this channel; only the trusted local panel has the settings bridge.
+  auto *channel = new QWebChannel(page);
+  channel->registerObject(QStringLiteral("whatlyBridge"), m_pageBridge);
+  auto *host = new SettingsNavigationHost(channel);
+  channel->registerObject(QStringLiteral("whatlySettingsHost"), host);
+  connect(host, &SettingsNavigationHost::panelChanged, this,
+          [this, page](const QVariantMap &state) {
+            updateEmbeddedSettings(page, state);
+          });
+  connect(page, &QWebEnginePage::loadStarted, this, [this, page]() {
+    if (m_settingsSourcePage == page)
+      closeEmbeddedSettings();
+  });
+  page->setWebChannel(channel);
 
   // Qt puts the transport in place, but the page still has to speak the
   // protocol: qwebchannel.js ships inside the QtWebChannel library as a
@@ -220,6 +328,9 @@ void MainWindow::installPageBridge(QWebEnginePage *page) {
       }
       new QWebChannel(qt.webChannelTransport, function (channel) {
         window.__whatlyBridge = channel.objects.whatlyBridge;
+        window.__whatlySettingsHost = channel.objects.whatlySettingsHost;
+        if (window.__whatlySettingsNavigation)
+          window.__whatlySettingsNavigation.refresh();
       });
     })();
   )js"));
@@ -233,24 +344,19 @@ void MainWindow::installPageBridge(QWebEnginePage *page) {
     scripts.remove(script);
   scripts.insert(bridge);
 
-  // With no system tray there is no tray menu, and the window has no menu bar or
-  // chrome of its own, so Settings can only be reached by the (undiscoverable)
-  // Ctrl+P — which is what issue #103 ran into. Give exactly those users a small
-  // floating gear that opens Settings through the bridge. Not injected when a
-  // tray is present, so the usual chrome-less look is unchanged.
-  {
-    QWebEngineScript gear;
-    gear.setName(QStringLiteral("whatly-settings-affordance"));
-    const auto staleGear = scripts.find(gear.name());
-    for (const auto &script : staleGear)
-      scripts.remove(script);
-    if (!QSystemTrayIcon::isSystemTrayAvailable()) {
-      gear.setSourceCode(settingsAffordanceScript());
-      gear.setInjectionPoint(QWebEngineScript::DocumentReady);
-      gear.setWorldId(QWebEngineScript::MainWorld);
-      gear.setRunsOnSubFrames(false);
-      scripts.insert(gear);
-    }
+  // The entry lives in WhatsApp's settings list. The former fixed-position
+  // fallback gear obscured the profile button on desktops without a tray.
+  QFile navigation(QStringLiteral(":/whatly/settings/settings-navigation.js"));
+  if (navigation.open(QIODevice::ReadOnly)) {
+    QWebEngineScript entry;
+    entry.setName(QStringLiteral("whatly-settings-navigation"));
+    entry.setSourceCode(QString::fromUtf8(navigation.readAll()));
+    entry.setInjectionPoint(QWebEngineScript::DocumentReady);
+    entry.setWorldId(QWebEngineScript::MainWorld);
+    entry.setRunsOnSubFrames(false);
+    for (const auto &old : scripts.find(entry.name()))
+      scripts.remove(old);
+    scripts.insert(entry);
   }
 
   // The scheduled-message sender rides along on every load: it looks for a job
@@ -318,52 +424,8 @@ void MainWindow::installPageBridge(QWebEnginePage *page) {
   scripts.insert(nameSender);
 }
 
-// The page-side automation for `--send --file`. Injected on every load; a no-op
-// until a job appears in sessionStorage under 'whatlyAttachJob'. Verified live
-// against current WhatsApp Web: type the caption into the composer first, then
-// A small floating gear that opens Settings through the bridge, injected only
-// when there is no system tray (issue #103). Kept deliberately plain and out of
-// the way (bottom-left, half-faded until hovered) since it exists as a fallback,
-// not decoration. Its label is the already-translated "Settings".
-QString MainWindow::settingsAffordanceScript() {
-  QString label = tr("Settings");
-  label.replace(QLatin1Char('\\'), QLatin1String("\\\\"))
-      .replace(QLatin1Char('\''), QLatin1String("\\'"));
-  return QStringLiteral(R"JS(
-    (function(){
-      if (window.__whatlySettingsFab) return;
-      window.__whatlySettingsFab = true;
-      function add(){
-        if (!document.body || document.getElementById('whatly-settings-fab')) return;
-        var b = document.createElement('button');
-        b.id = 'whatly-settings-fab';
-        b.type = 'button';
-        b.title = ')JS") +
-         label + QStringLiteral(R"JS(';
-        b.setAttribute('aria-label', b.title);
-        b.textContent = '⚙';
-        b.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:2147483647;'
-          + 'width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;'
-          + 'font-size:17px;line-height:34px;text-align:center;padding:0;'
-          + 'background:rgba(0,0,0,.55);color:#fff;opacity:.5;'
-          + 'transition:opacity .15s;box-shadow:0 1px 4px rgba(0,0,0,.4);';
-        b.addEventListener('mouseenter', function(){ b.style.opacity='1'; });
-        b.addEventListener('mouseleave', function(){ b.style.opacity='.5'; });
-        b.addEventListener('click', function(){
-          try { if (window.__whatlyBridge && window.__whatlyBridge.openSettings)
-            window.__whatlyBridge.openSettings(); } catch (e) {}
-        });
-        document.body.appendChild(b);
-      }
-      if (document.body) add();
-      else document.addEventListener('DOMContentLoaded', add);
-    })();
-  )JS");
-}
-
-// PASTE the image (a ClipboardEvent carrying the File — the hidden file-input
-// path attaches the image but loses the caption), which opens the media editor
-// with the caption already set; then click Send with a full pointer sequence.
+// On each load, resume a sessionStorage whatlyAttachJob by pasting its file
+// into the media editor, preserving the caption, then clicking Send.
 QString MainWindow::attachmentSenderScriptSource() {
   return QString::fromLatin1(R"JS(
 (function () {
