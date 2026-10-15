@@ -123,5 +123,5 @@ if(UNIX AND NOT APPLE)
 endif()
 add_test(NAME embedded_settings COMMAND tst_embeddedsettingsbridge)
 set_tests_properties(embedded_settings PROPERTIES ENVIRONMENT
-    "QT_QPA_PLATFORM=offscreen;QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu;WHATLY_SETTINGS_APP=whatly-embedded-test"
+    "QT_QPA_PLATFORM=offscreen;QTWEBENGINE_CHROMIUM_FLAGS=--disable-gpu;WHATLY_SETTINGS_APP=whatly-embedded-test;DBUS_SESSION_BUS_ADDRESS=unix:path=/nonexistent"
     TIMEOUT 90)

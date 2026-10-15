@@ -34,6 +34,7 @@
     let openDeadline = 0;
     let hostDeadline = 0;
     let columnObserver = null;
+    let missingSince = 0;
 
     function rendered(element) {
         if (!element || !element.isConnected || owned(element)) return false;
@@ -165,22 +166,35 @@
             if (row.style[key] !== value) row.style[key] = value;
         }
         row.setAttribute('aria-pressed', active ? 'true' : 'false');
+        const description = row.querySelector('[data-whatly-settings-description]');
+        if (description) description.style.color = colors.muted;
     }
 
     function addRow(next) {
-        if (row && row.isConnected && row.parentElement === next.list && row.nextElementSibling === next.anchor) {
-            context = next;
-            return;
-        }
-        if (active) close();
-        if (row) row.remove();
+        const previousColumn = context && context.column;
         context = next;
-        row = document.createElement('button');
+        // React may replace rows or the entire list on hover. Move our existing
+        // entry into the new list without dismissing the independently owned form.
+        if (!row) row = createRow();
+        if (row.parentElement !== next.list || row.nextElementSibling !== next.anchor)
+            next.list.insertBefore(row, next.anchor);
+        if (previousColumn !== next.column || !columnObserver) {
+            if (columnObserver) columnObserver.disconnect();
+            if (typeof ResizeObserver !== 'undefined') {
+                columnObserver = new ResizeObserver(schedule);
+                columnObserver.observe(next.column);
+            }
+        }
+    }
+
+    function createRow() {
+        const row = document.createElement('button');
         row.id = ROW_ID;
         row.type = 'button';
         row.setAttribute('data-whatly-settings-owned', 'row');
         row.setAttribute('aria-label', 'Whatly Settings');
-        row.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;gap:24px;width:100%;min-height:60px;padding:14px 24px;border:0;border-radius:0;text-align:start;cursor:pointer;flex-shrink:0;';
+        row.setAttribute('aria-describedby', ROW_ID + '-description');
+        row.style.cssText = 'box-sizing:border-box;display:flex;align-items:center;gap:24px;width:100%;min-height:72px;padding:14px 24px;border:0;border-radius:0;text-align:start;cursor:pointer;flex-shrink:0;';
         const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         icon.setAttribute('viewBox', '0 0 24 24');
         icon.setAttribute('width', '24');
@@ -190,7 +204,15 @@
         icon.innerHTML = '<path fill="currentColor" d="m19.4 13 .1-1-.1-1 2-1.5-2-3.4-2.3.9a8 8 0 0 0-1.7-1L15 3h-4l-.4 3a8 8 0 0 0-1.7 1l-2.3-.9-2 3.4L6.6 11l-.1 1 .1 1-2 1.5 2 3.4 2.3-.9a8 8 0 0 0 1.7 1l.4 3h4l.5-3a8 8 0 0 0 1.7-1l2.3.9 2-3.4-2.1-1.5ZM13 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/>';
         const label = document.createElement('span');
         label.textContent = 'Whatly Settings';
-        row.append(icon, label);
+        const description = document.createElement('span');
+        description.id = ROW_ID + '-description';
+        description.setAttribute('data-whatly-settings-description', '');
+        description.style.cssText = 'font-size:13px;line-height:18px;white-space:normal;';
+        description.textContent = 'Appearance, notifications and desktop preferences';
+        const textColumn = document.createElement('span');
+        textColumn.style.cssText = 'display:flex;flex-direction:column;gap:4px;min-width:0;';
+        textColumn.append(label, description);
+        row.append(icon, textColumn);
         row.addEventListener('click', event => {
             event.preventDefault();
             event.stopPropagation();
@@ -200,13 +222,7 @@
             if (!active) row.style.backgroundColor = appearance(context.list).mode === 'dark' ? '#202c33' : '#f0f2f5';
         });
         row.addEventListener('pointerleave', paintRow);
-        next.list.insertBefore(row, next.anchor);
-        paintRow();
-        if (columnObserver) columnObserver.disconnect();
-        if (typeof ResizeObserver !== 'undefined') {
-            columnObserver = new ResizeObserver(schedule);
-            columnObserver.observe(next.column);
-        }
+        return row;
     }
 
     function contentRect() {
@@ -312,15 +328,23 @@
     function updatePanel() {
         if (!active || !context) return;
         const rect = contentRect();
-        if (!rect) { close(); inlineStatus('There is not enough room to display Whatly Settings.'); return; }
+        // A transient zero-sized layout must not destroy an open form or its
+        // drafts. Native view hiding/account changes are handled by Qt.
+        if (!rect) {
+            if (!placeholder) {
+                close();
+                inlineStatus('There is not enough room to display Whatly Settings.');
+            }
+            return;
+        }
         if (!placeholder) {
             placeholder = document.createElement('div');
             placeholder.id = PANEL_ID;
             placeholder.setAttribute('data-whatly-settings-owned', 'panel');
             placeholder.setAttribute('aria-hidden', 'true');
             placeholder.style.cssText = 'position:fixed;box-sizing:border-box;z-index:100;';
-            document.body.appendChild(placeholder);
         }
+        if (!placeholder.isConnected) document.body.appendChild(placeholder);
         const colors = appearance(context.list);
         const styles = { left: rect.x + 'px', top: rect.y + 'px', width: rect.width + 'px', height: rect.height + 'px', backgroundColor: colors.background };
         for (const [key, value] of Object.entries(styles)) {
@@ -335,6 +359,7 @@
         clearTimeout(openTimer);
         openDeadline = 0;
         addRow(next);
+        missingSince = 0;
         const status = document.getElementById(STATUS_ID);
         if (status) status.remove();
         active = true;
@@ -346,6 +371,7 @@
 
     function close() {
         active = false;
+        missingSince = 0;
         openDeadline = 0;
         hostDeadline = 0;
         clearTimeout(openTimer);
@@ -379,25 +405,43 @@
     }
 
     function refresh() {
+        clearTimeout(scheduled);
         scheduled = 0;
-        if (active && (!context || !rendered(context.list) || !context.anchor.isConnected || !row || !row.isConnected)) close();
         const next = locate();
         if (!next) {
-            if (active) close();
+            if (active) {
+                // Brief gaps between React commits are not navigation. Keep the
+                // last geometry while settings remains selected, but close after
+                // a bounded grace period if the native page really disappeared.
+                if (!missingSince) missingSince = Date.now();
+                const nav = railSettings();
+                const selected = nav && ['aria-pressed', 'aria-selected', 'aria-current'].some(name =>
+                    ['true', 'page'].includes(nav.getAttribute(name)));
+                const heading = Array.from(document.querySelectorAll('h1,h2,[role="heading"]')).some(element =>
+                    rendered(element) && SETTINGS_LABEL.test(text(element)));
+                if ((selected && context && rendered(context.column)) || heading || Date.now() - missingSince < 1500) {
+                    if (Date.now() - missingSince < 1500) schedule(200);
+                    return;
+                }
+                close();
+            }
             if (row) row.remove();
             row = null;
             context = null;
             if (columnObserver) columnObserver.disconnect();
+            columnObserver = null;
             return;
         }
+        missingSince = 0;
         addRow(next);
         paintRow();
         updatePanel();
         if (!active) report({ visible: false });
     }
 
-    function schedule() {
-        if (!scheduled) scheduled = setTimeout(refresh, 120);
+    function schedule(delay = 120) {
+        // Event listeners and ResizeObserver pass objects, not timer delays.
+        if (!scheduled) scheduled = setTimeout(refresh, typeof delay === 'number' ? delay : 120);
     }
 
     // Navigation is observed without reading messages or following React's
@@ -432,8 +476,9 @@
     window.addEventListener('hashchange', close);
     window.addEventListener('pagehide', close);
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) close();
-        else schedule();
+        // A native child WebEngine view can occlude this page without navigating
+        // away. Qt owns real window/account hiding; browser visibility does not.
+        if (!document.hidden) schedule();
     });
 
     window.__whatlySettingsNavigation = { open, close, refresh };

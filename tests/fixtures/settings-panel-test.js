@@ -2,6 +2,7 @@
  * Serve the repository root, then open tests/fixtures/settings-panel.html.
  * Results are available in window.testResults and #test-results as JSON;
  * window.testDone becomes true after all asynchronous checks finish.
+ * Add ?preview&theme=dark for an interactive visual fixture without test edits.
  */
 
 const control = (id, type, label, value, extra = {}) => ({ id, type, label, value, ...extra });
@@ -74,6 +75,11 @@ window.whatlySettingsBridge = {
 };
 
 window.addEventListener("load", async () => {
+    const parameters = new URLSearchParams(location.search);
+    if (parameters.has("preview")) {
+        window.applyAppearance({ mode: parameters.get("theme") === "dark" ? "dark" : "light" });
+        return;
+    }
     const results = window.testResults;
     window.fixtureResults = results;
     const assert = (name, value) => {
@@ -85,12 +91,34 @@ window.addEventListener("load", async () => {
     const field = id => row(id).querySelector("input,select,button");
     const change = node => node.dispatchEvent(new Event("change", { bubbles: true }));
     const tick = () => new Promise(resolve => setTimeout(resolve, 50));
+    const visiblePanels = () => Array.from(document.querySelectorAll('[role="tabpanel"]')).filter(panel => !panel.hidden);
+    const tab = id => document.querySelector(`[role="tab"][data-category-id="${id}"]`);
+    const chooseCategory = id => {
+        document.getElementById("category-select").value = id;
+        change(document.getElementById("category-select"));
+    };
 
     try {
         assert("all types render", document.querySelectorAll("[data-control-id]").length === 15);
         assert("loading finishes", document.querySelector("main").getAttribute("aria-busy") === "false");
         assert("passwords never prefilled", field("secret").value === "" && field("secret").placeholder.includes("Already set"));
         assert("disabled controls disabled", field("disabled").disabled);
+        assert("categories have accessible tabs and associated panels", document.querySelectorAll('[role="tab"]').length === 3 &&
+            document.getElementById(tab("appearance").getAttribute("aria-controls")).getAttribute("aria-labelledby") === tab("appearance").id);
+        assert("only the selected category is visible", visiblePanels().length === 1 && visiblePanels()[0].dataset.categoryId === "appearance" && row("tray").hidden);
+        chooseCategory("general");
+        assert("category selector changes the visible form", visiblePanels().length === 1 && !row("tray").hidden && row("font").hidden && tab("general").getAttribute("aria-selected") === "true");
+        fixtureEmit(fixtureSnapshot);
+        assert("backend refresh retains the selected category", visiblePanels()[0].dataset.categoryId === "general");
+        if (matchMedia("(min-width: 620px)").matches) {
+            tab("general").focus();
+            tab("general").dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true, cancelable: true }));
+            assert("category navigation is keyboard accessible", document.activeElement === tab("advanced") && visiblePanels()[0].dataset.categoryId === "advanced");
+        } else {
+            assert("category navigation is keyboard accessible", getComputedStyle(document.querySelector(".compact-category")).display !== "none" &&
+                document.getElementById("category-select").getAttribute("aria-label") === "Settings category");
+        }
+        chooseCategory("appearance");
 
         field("follow").checked = false;
         change(field("follow"));
@@ -111,14 +139,21 @@ window.addEventListener("load", async () => {
         input.value = "Draft font";
         input.dispatchEvent(new Event("input"));
         input.setSelectionRange(2, 5);
+        document.querySelector("main").style.maxHeight = "180px";
         document.querySelector("main").scrollTop = 90;
         const scroll = document.querySelector("main").scrollTop;
         fixtureSnapshot.sections[0].controls[2].value = "Changed elsewhere";
         fixtureEmit(fixtureSnapshot);
         assert("snapshot preserves dirty value", input.value === "Draft font");
         assert("snapshot preserves focus and selection", document.activeElement === input && input.selectionStart === 2 && input.selectionEnd === 5);
-        assert("snapshot preserves scroll", document.querySelector("main").scrollTop === scroll);
+        assert("snapshot preserves scroll", scroll > 0 && document.querySelector("main").scrollTop === scroll);
+        chooseCategory("general");
+        chooseCategory("appearance");
+        assert("switching categories preserves drafts and control identity", field("font") === input && input.value === "Draft font");
+        assert("returning to a category restores its scroll position", document.querySelector("main").scrollTop === scroll);
+        document.querySelector("main").style.maxHeight = "";
         change(input);
+        chooseCategory("advanced");
         field("apply").click();
         await tick();
         assert("text save precedes apply", equal(fixtureCalls.slice(-2), [
@@ -129,11 +164,18 @@ window.addEventListener("load", async () => {
         search.value = "window zoom";
         search.dispatchEvent(new Event("input"));
         assert("search filters all words", !row("zoom").hidden && row("font").hidden);
+        assert("global search jumps to a matching category", visiblePanels().length === 1 && visiblePanels()[0].dataset.categoryId === "appearance");
+        search.value = "window";
+        search.dispatchEvent(new Event("input"));
+        assert("search shows category match counts", !tab("appearance").hidden && !tab("general").hidden && tab("advanced").hidden &&
+            !tab("general").querySelector(".category-count").hidden && document.getElementById("search-summary").textContent.includes("2 categories"));
+        chooseCategory("general");
+        assert("search still shows only one selected category", visiblePanels().length === 1 && !row("tray").hidden && row("zoom").hidden);
         search.value = "unfindable";
         search.dispatchEvent(new Event("input"));
-        assert("empty search result visible", !document.getElementById("no-results").hidden);
+        assert("empty search result visible", !document.getElementById("no-results").hidden && visiblePanels().length === 0 && document.getElementById("category-select").disabled);
         document.getElementById("clear-search").click();
-        assert("clear search restores rows", !row("font").hidden && document.getElementById("no-results").hidden);
+        assert("clear search restores the previous category", !row("ua").hidden && row("font").hidden && document.getElementById("no-results").hidden && visiblePanels().length === 1);
 
         const checkbox = row("dict").querySelectorAll("input")[1];
         checkbox.checked = true;
@@ -162,6 +204,14 @@ window.addEventListener("load", async () => {
         window.applyAppearance({ mode: "dark", background: "#111b21", foreground: "#e9edef", accent: "#00a884", fontFamily: "Arial" });
         assert("appearance follows supplied palette", getComputedStyle(document.body).backgroundColor === "rgb(17, 27, 33)");
         assert("no horizontal document overflow", document.documentElement.scrollWidth === window.innerWidth);
+        assert("category layout adapts to available width", matchMedia("(min-width: 620px)").matches
+            ? getComputedStyle(document.getElementById("category-sidebar")).display !== "none" && getComputedStyle(document.querySelector(".compact-category")).display === "none"
+            : getComputedStyle(document.getElementById("category-sidebar")).display === "none" && getComputedStyle(document.querySelector(".compact-category")).display !== "none");
+        const removed = fixtureSnapshot.sections.splice(2, 1)[0];
+        fixtureEmit(fixtureSnapshot);
+        assert("removed selected category falls back to an available one", visiblePanels().length === 1 && visiblePanels()[0].dataset.categoryId === "appearance" && !tab("advanced"));
+        fixtureSnapshot.sections.push(removed);
+        fixtureEmit(fixtureSnapshot);
         document.getElementById("close-settings").click();
         assert("back closes panel", fixtureCalls.at(-1)[0] === "close");
     } catch (error) {

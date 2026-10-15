@@ -19,12 +19,12 @@
                 </button>
                 <div class="heading-copy">
                     <h1 id="panel-title">Whatly Settings</h1>
-                    <p>Customize your desktop experience</p>
+                    <p>Manage your desktop app preferences</p>
                 </div>
             </div>
             <div class="search-field">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9"/></svg>
-                <input id="settings-search" type="search" placeholder="Search settings" aria-label="Search Whatly settings" autocomplete="off" spellcheck="false">
+                <input id="settings-search" type="search" placeholder="Search all settings" aria-label="Search Whatly settings" autocomplete="off" spellcheck="false">
                 <button id="clear-search" class="icon-button clear-search" type="button" aria-label="Clear search" hidden>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18.3 5.71-1.41-1.42L12 9.17 7.11 4.29 5.7 5.71l4.88 4.88-4.88 4.88 1.41 1.42L12 12.01l4.89 4.88 1.41-1.42-4.88-4.88z"/></svg>
                 </button>
@@ -37,18 +37,28 @@
             <button id="dismiss-feedback" class="text-button" type="button">Dismiss</button>
         </div>
 
-        <main id="settings-content" class="settings-content" aria-label="Whatly settings" aria-busy="true">
-            <div id="loading-settings" class="empty-state" role="status">
-                <span class="loading-indicator" aria-hidden="true"></span>
-                <p>Loading your settings…</p>
+        <div class="settings-workspace">
+            <aside id="category-sidebar" class="category-sidebar" aria-label="Settings categories">
+                <p class="category-caption">Categories</p>
+                <div id="category-tabs" class="category-tabs" role="tablist" aria-label="Settings categories" aria-orientation="vertical"></div>
+            </aside>
+            <div class="compact-category">
+                <label for="category-select">Category</label>
+                <select id="category-select" aria-label="Settings category" disabled></select>
             </div>
-            <div id="settings-sections"></div>
-            <div id="no-results" class="empty-state" hidden>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9"/></svg>
-                <h2>No settings found</h2>
-                <p>Try a different word or clear your search.</p>
-            </div>
-        </main>
+            <main id="settings-content" class="settings-content" aria-label="Whatly settings" aria-busy="true">
+                <div id="loading-settings" class="empty-state" role="status">
+                    <span class="loading-indicator" aria-hidden="true"></span>
+                    <p>Loading your settings…</p>
+                </div>
+                <div id="settings-sections"></div>
+                <div id="no-results" class="empty-state" hidden>
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9"/></svg>
+                    <h2>No settings found</h2>
+                    <p>Try a different word or clear your search.</p>
+                </div>
+            </main>
+        </div>
     </div>
 </body>
 </html>

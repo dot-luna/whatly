@@ -79,6 +79,11 @@
                     document.querySelectorAll('#whatly-settings-row').length === 1 &&
                     document.getElementById('whatly-settings-row').nextElementSibling.id === 'logout-row');
                 check('does not add any floating settings control', !document.getElementById('whatly-settings-fab'));
+                const description = document.getElementById('whatly-settings-row-description');
+                check('settings row has a muted accessible description under its title', description &&
+                    description.textContent === 'Appearance, notifications and desktop preferences' &&
+                    getComputedStyle(description).color !== getComputedStyle(document.getElementById('whatly-settings-row')).color &&
+                    document.getElementById('whatly-settings-row').getAttribute('aria-describedby') === description.id);
                 const native = document.getElementById('native-content');
                 check('opens through public API', api.open());
                 const mainRect = document.getElementById('main').getBoundingClientRect();
@@ -91,6 +96,53 @@
                 const count = window.panelStates.length;
                 await wait(1300);
                 check('idle observation does not repeatedly report identical geometry', window.panelStates.length === count);
+
+                // A React hover update may replace a sibling row without changing
+                // the selected page. Keep the form and its draft alive throughout.
+                const hoverStates = window.panelStates.length;
+                const privacy = document.getElementById('privacy-row');
+                privacy.addEventListener('pointerenter', () => {
+                    const logout = document.getElementById('logout-row');
+                    logout.replaceWith(logout.cloneNode(true));
+                }, { once: true });
+                privacy.dispatchEvent(new PointerEvent('pointerenter'));
+                await wait(300);
+                check('hover-driven native row replacement preserves the open form', lastState().visible &&
+                    window.panelStates.slice(hoverStates).every(state => state.visible));
+                const entry = document.getElementById('whatly-settings-row');
+                for (const type of ['pointerenter', 'pointermove', 'pointerleave']) {
+                    entry.dispatchEvent(new PointerEvent(type));
+                    document.getElementById('whatly-settings-placeholder').dispatchEvent(new PointerEvent(type));
+                }
+                await wait(200);
+                check('pointer motion between the entry and pane never dismisses settings', lastState().visible &&
+                    window.panelStates.slice(hoverStates).every(state => state.visible));
+
+                const separator = document.createElement('div');
+                entry.after(separator);
+                api.refresh();
+                check('native sibling insertion repairs row placement without closing or replacing it', lastState().visible &&
+                    document.getElementById('whatly-settings-row') === entry && entry.nextElementSibling.id === 'logout-row' &&
+                    window.panelStates.slice(hoverStates).every(state => state.visible));
+                entry.remove();
+                await wait(300);
+                check('React removing the injected entry reinstalls it without losing the form', lastState().visible &&
+                    document.getElementById('whatly-settings-row') === entry &&
+                    window.panelStates.slice(hoverStates).every(state => state.visible));
+
+                // Qt permits overriding visibility for this regression. Some
+                // preview hosts pin it themselves, so still exercise the event.
+                const hiddenDescriptor = Object.getOwnPropertyDescriptor(document, 'hidden');
+                const canOverrideHidden = !hiddenDescriptor || hiddenDescriptor.configurable;
+                if (canOverrideHidden) Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+                document.dispatchEvent(new Event('visibilitychange'));
+                check('page visibility updates do not count as account navigation', lastState().visible &&
+                    window.panelStates.slice(hoverStates).every(state => state.visible));
+                if (canOverrideHidden) {
+                    if (hiddenDescriptor) Object.defineProperty(document, 'hidden', hiddenDescriptor);
+                    else delete document.hidden;
+                }
+                document.dispatchEvent(new Event('visibilitychange'));
                 document.getElementById('profile-nav').click();
                 check('profile navigation closes and restores the native content', !lastState().visible &&
                     !document.getElementById('whatly-settings-placeholder') && native.isConnected);
@@ -106,11 +158,48 @@
 
                 restore();
                 api.open();
+                const remountStates = window.panelStates.length;
+                const remountPlaceholder = document.getElementById('whatly-settings-placeholder');
                 document.getElementById('settings-column').innerHTML = new DOMParser()
                     .parseFromString(window.fixtureMarkup, 'text/html').getElementById('settings-column').innerHTML;
                 await wait(300);
-                check('WhatsApp remount closes panel and reinstalls a single list entry', !lastState().visible &&
-                    document.querySelectorAll('#whatly-settings-row').length === 1);
+                check('WhatsApp settings-list remount preserves the form and a single list entry', lastState().visible &&
+                    document.querySelectorAll('#whatly-settings-row').length === 1 &&
+                    document.getElementById('whatly-settings-placeholder') === remountPlaceholder &&
+                    window.panelStates.slice(remountStates).every(state => state.visible));
+
+                const oldColumn = document.getElementById('settings-column');
+                const nextColumn = oldColumn.cloneNode(true);
+                nextColumn.querySelector('#whatly-settings-row').remove();
+                oldColumn.replaceWith(nextColumn);
+                await wait(300);
+                check('replacing the whole native settings column preserves the open form', lastState().visible &&
+                    document.getElementById('whatly-settings-placeholder') === remountPlaceholder &&
+                    window.panelStates.slice(remountStates).every(state => state.visible));
+
+                nextColumn.remove();
+                api.refresh();
+                await wait(300);
+                check('temporary missing native layout does not immediately dismiss settings', lastState().visible);
+                document.getElementById('main').before(nextColumn);
+                await wait(300);
+                check('settings layout recovery keeps the same form without a close/reopen cycle', lastState().visible &&
+                    document.getElementById('whatly-settings-placeholder') === remountPlaceholder &&
+                    window.panelStates.slice(remountStates).every(state => state.visible));
+
+                // A real page transition may be initiated by WhatsApp itself,
+                // without a click or history event for the adapter to intercept.
+                nextColumn.remove();
+                document.getElementById('settings-nav').setAttribute('aria-pressed', 'false');
+                api.refresh();
+                await wait(1900);
+                check('leaving native settings without a click closes after the remount grace period', !lastState().visible &&
+                    !document.getElementById('whatly-settings-placeholder'));
+
+                restore();
+                api.open();
+                document.getElementById('account-row').click();
+                check('choosing a different native settings row closes immediately', !lastState().visible);
 
                 restore();
                 app.setAttribute('dir', 'rtl');

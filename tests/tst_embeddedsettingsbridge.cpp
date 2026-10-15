@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QSettings>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QStandardItemModel>
 #include <QStandardPaths>
@@ -21,13 +22,30 @@
 #include <QWebEnginePage>
 #include <QWebEngineProfile>
 #include <QWebEngineSettings>
+#include <QWebEngineUrlRequestInfo>
+#include <QWebEngineUrlRequestInterceptor>
 
 #include "dictionaryrows.h"
 #include "embeddedsettingsbridge.h"
 #include "embeddedsettingsview.h"
+#include "mainwindow.h"
 #include "pagebridge.h"
 #include "settingsmanager.h"
 #include "settingswidget.h"
+#include "setupwizard.h"
+#include "updatechecker.h"
+#include "webengineprofilemanager.h"
+#include "webview.h"
+
+namespace {
+class BlockRemoteRequests : public QWebEngineUrlRequestInterceptor {
+public:
+  void interceptRequest(QWebEngineUrlRequestInfo &request) override {
+    const QString scheme = request.requestUrl().scheme();
+    request.block(scheme == QLatin1String("http") || scheme == QLatin1String("https"));
+  }
+};
+} // namespace
 
 class TstEmbeddedSettingsBridge : public QObject {
   Q_OBJECT
@@ -85,7 +103,13 @@ private slots:
     m_dialogCloser.start();
   }
 
-  void init() { SettingsManager::instance().settings().clear(); }
+  void init() {
+    QSettings &saved = SettingsManager::instance().settings();
+    saved.clear();
+    // Set before the first profile-manager access, including the standalone
+    // form's setting handlers: Chromium must never use a personal data folder.
+    saved.setValue(QStringLiteral("storage/dataDir"), m_settingsDir.path() + QStringLiteral("/browser"));
+  }
 
   void exportsAllSectionsWhileNativeWindowStaysHidden() {
     QTemporaryDir cache, storage;
@@ -252,6 +276,11 @@ private slots:
     QVERIFY(view.page()->profile()->isOffTheRecord());
     QTRY_VERIFY_WITH_TIMEOUT(javascript(view.page(), QStringLiteral(
         "!!document.querySelector('[data-control-id=\"smoothScrollingCheckBox\"] input')")).toBool(), 20000);
+    javascript(view.page(), QStringLiteral(
+        "(() => { const search = document.getElementById('settings-search');"
+        "search.value='smooth scrolling'; search.dispatchEvent(new Event('input',{bubbles:true})); })();"));
+    QTRY_VERIFY(javascript(view.page(), QStringLiteral(
+        "document.querySelector('[data-control-id=\"smoothScrollingCheckBox\"] input').getBoundingClientRect().height > 0")).toBool());
     view.setAppearance({{QStringLiteral("background"), QStringLiteral("rgb(20, 31, 42)")},
                         {QStringLiteral("foreground"), QStringLiteral("rgba(230, 235, 240, 0.9)")},
                         {QStringLiteral("mode"), QStringLiteral("dark")}});
@@ -289,13 +318,157 @@ private slots:
     QCOMPARE(view.url(), QUrl(QStringLiteral("qrc:/whatly/settings/settings.html")));
   }
 
+  void mainWindowPanelSurvivesPointerFocusOcclusionAndResize() {
+    SetupWizard::markCompleted();
+    UpdateChecker::setEnabled(false);
+    QSettings &saved = SettingsManager::instance().settings();
+    saved.setValue(QStringLiteral("hideTrayIcon"), true);
+    saved.setValue(QStringLiteral("normalGeometry"), QRect(0, 0, 1200, 850));
+    saved.setValue(QStringLiteral("appAutoLocking"), false);
+
+    // MainWindow creates the real account, page scripts and WebChannel. Block
+    // its initial WhatsApp navigation before constructing it, then supply only
+    // synthetic markup under the URL expected by its production origin guard.
+    BlockRemoteRequests blocker;
+    QWebEngineProfile *profile = WebEngineProfileManager::instance().profile();
+    profile->setUrlRequestInterceptor(&blocker);
+    const auto resetInterceptor = qScopeGuard([profile] {
+      profile->setUrlRequestInterceptor(nullptr);
+    });
+    MainWindow window;
+    window.resize(1200, 850);
+    window.show();
+    auto *account = window.findChild<WebView *>();
+    auto *settings = window.findChild<SettingsWidget *>();
+    QVERIFY(account && settings);
+    account->stop();
+    QTest::qWait(100); // let the account's queued native reparent/show settle
+    const QString html = QStringLiteral(R"HTML(
+      <!doctype html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;height:100%;font:15px Arial;background:#fff;color:#111b21}
+      #app{display:flex;width:100vw;height:100vh}
+      #rail{flex:0 0 64px;background:#f0f2f5;display:flex;flex-direction:column;justify-content:flex-end}
+      #rail button{width:48px;height:48px;margin:4px 8px;border:0}
+      #settings-column{flex:0 0 320px;overflow:auto;background:#fff}
+      h1{padding:20px 24px;margin:0;font-size:24px}
+      #settings-list{display:flex;flex-direction:column}
+      .native-row{display:flex;align-items:center;width:100%;min-height:60px;padding:14px 24px;gap:24px;border:0;background:transparent;color:inherit;font:inherit}
+      .native-row [data-icon]{display:inline-block;width:24px;height:24px}
+      #main{flex:1;min-width:0;background:#f7f9fa}
+      </style></head><body><div id="app">
+      <nav id="rail"><button id="settings-nav" aria-label="Settings" aria-pressed="true"><span data-icon="settings">S</span></button><button id="profile-nav" aria-label="Profile">P</button></nav>
+      <section id="settings-column"><h1>Settings</h1><div id="settings-list" data-testid="settings-list">
+      <button class="native-row" id="account-row"><span data-icon="account">A</span><span>Account</span></button>
+      <button class="native-row" id="privacy-row"><span data-icon="privacy">P</span><span>Privacy</span></button>
+      <button class="native-row" id="logout-row"><span data-icon="exit">X</span><span>Log out</span></button>
+      </div></section><main id="main">Synthetic conversation area</main></div></body></html>
+    )HTML");
+    QSignalSpy loaded(account, &QWebEngineView::loadFinished);
+    account->setHtml(html, QUrl(QStringLiteral("https://web.whatsapp.com/")));
+    QVERIFY(loaded.wait(15000));
+    QVERIFY(loaded.last().first().toBool());
+    QCOMPARE(account->url().host(), QStringLiteral("web.whatsapp.com"));
+    QTRY_VERIFY_WITH_TIMEOUT(javascript(account->page(), QStringLiteral(
+        "!!document.getElementById('whatly-settings-row') && !!window.__whatlySettingsHost")).toBool(), 10000);
+
+    const auto center = [](QWebEngineView *view, const QString &selector) {
+      const QVariantList point = javascript(view->page(), QStringLiteral(
+          "(() => { const n = document.querySelector('%1'); if (!n) return [-1,-1];"
+          "const r = n.getBoundingClientRect(); return [r.x+r.width/2,r.y+r.height/2]; })()")
+          .arg(selector)).toList();
+      return point.size() == 2 ? QPoint(qRound(point[0].toDouble() * view->zoomFactor()),
+                                        qRound(point[1].toDouble() * view->zoomFactor())) : QPoint(-1, -1);
+    };
+    const auto click = [&center](QWebEngineView *view, const QString &selector) {
+      QWidget *target = view->focusProxy() ? view->focusProxy() : view;
+      const QPoint point = center(view, selector);
+      QTest::mouseMove(target, point);
+      QTest::mouseClick(target, Qt::LeftButton, Qt::NoModifier, point);
+    };
+    window.activateWindow();
+    account->setFocus();
+    click(account, QStringLiteral("#whatly-settings-row"));
+    QTRY_VERIFY_WITH_TIMEOUT(window.findChild<EmbeddedSettingsView *>() &&
+        window.findChild<EmbeddedSettingsView *>()->isVisible(), 10000);
+    auto *panel = window.findChild<EmbeddedSettingsView *>();
+    QVERIFY(panel);
+    QTRY_VERIFY_WITH_TIMEOUT(javascript(panel->page(), QStringLiteral(
+        "!!document.querySelector('[data-control-id=\"smoothScrollingCheckBox\"] input')")).toBool(), 10000);
+
+    // React can replace a native row just from hover. Drive the real browser
+    // pointer into that row and confirm the host never closes the child form.
+    javascript(account->page(), QStringLiteral(
+        "window.pointerReplacements=0;"
+        "document.getElementById('privacy-row').addEventListener('pointerenter',()=>{"
+        "const logout=document.getElementById('logout-row');"
+        "logout.replaceWith(logout.cloneNode(true)); window.pointerReplacements++; },{once:true});"));
+    QTest::mouseMove(account->focusProxy(), center(account, QStringLiteral("#privacy-row")));
+    QTRY_COMPARE(javascript(account->page(), QStringLiteral("window.pointerReplacements")).toInt(), 1);
+    QTest::qWait(300);
+    QVERIFY2(panel->isVisible(), "Hover replacement of the logout row must not close settings");
+
+    // Use native input events across both WebEngine surfaces, not just DOM
+    // clicks: moving into the separate child renderer must not dismiss it.
+    QTest::mouseMove(account->focusProxy(), QPoint(25, 50));
+    QTest::mouseMove(panel->focusProxy(), QPoint(90, 50));
+    click(panel, QStringLiteral("#settings-search"));
+    QTest::keyClicks(panel->focusProxy(), QStringLiteral("smooth scrolling"));
+    QTRY_VERIFY(javascript(panel->page(), QStringLiteral(
+        "document.querySelector('[data-control-id=\"smoothScrollingCheckBox\"] input').getBoundingClientRect().height > 0")).toBool());
+    auto *checkbox = settings->findChild<QCheckBox *>(QStringLiteral("smoothScrollingCheckBox"));
+    QVERIFY(checkbox);
+    const bool next = !checkbox->isChecked();
+    click(panel, QStringLiteral("[data-control-id=\"smoothScrollingCheckBox\"] input"));
+    QTRY_COMPARE(checkbox->isChecked(), next);
+    QVERIFY(panel->isVisible());
+    QVERIFY(!settings->isVisible());
+
+    // Offscreen Qt does not expose compositor occlusion. Reproduce its document
+    // visibility notification while retaining the real source/panel hierarchy.
+    javascript(account->page(), QStringLiteral(
+        "Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});"
+        "document.dispatchEvent(new Event('visibilitychange'));"));
+    QTest::qWait(300);
+    QVERIFY2(panel->isVisible(), "Native child occlusion must not close settings");
+    javascript(account->page(), QStringLiteral("delete document.hidden;"));
+
+    // React may replace or reorder the settings list while the pointer is over
+    // it. A new native list must preserve the already open child settings view.
+    javascript(account->page(), QStringLiteral(
+        "(() => { const old = document.getElementById('settings-list');"
+        "const fresh = old.cloneNode(true); fresh.querySelector('#whatly-settings-row')?.remove();"
+        "old.replaceWith(fresh); })();"));
+    QTest::qWait(400);
+    QVERIFY2(panel->isVisible(), "Replacing the native list must not close settings");
+    QTRY_COMPARE(javascript(account->page(), QStringLiteral(
+        "document.querySelectorAll('#whatly-settings-row').length")).toInt(), 1);
+
+    const int previousWidth = panel->width();
+    window.resize(1080, 760);
+    QTRY_VERIFY(panel->width() < previousWidth);
+    QVERIFY(panel->isVisible());
+    QTest::mouseMove(account->focusProxy(), QPoint(25, 50));
+    QTest::mouseMove(panel->focusProxy(), QPoint(90, 50));
+    QTest::qWait(200);
+    QVERIFY(panel->isVisible());
+
+    click(panel, QStringLiteral("#close-settings"));
+    QTRY_VERIFY(!panel->isVisible());
+    account->setFocus();
+    click(account, QStringLiteral("#whatly-settings-row"));
+    QTRY_VERIFY(panel->isVisible());
+    click(account, QStringLiteral("#profile-nav"));
+    QTRY_VERIFY(!panel->isVisible());
+  }
+
   void browserFixtures_data() {
     QTest::addColumn<QString>("fixture");
     QTest::addColumn<int>("width");
     QTest::addColumn<int>("expectedAssertions");
-    QTest::newRow("navigation") << QStringLiteral("settings-navigation.html") << 1280 << 25;
-    QTest::newRow("panel-520px") << QStringLiteral("settings-panel.html") << 520 << 23;
-    QTest::newRow("panel-320px") << QStringLiteral("settings-panel.html") << 320 << 23;
+    QTest::newRow("navigation") << QStringLiteral("settings-navigation.html") << 1280 << 36;
+    QTest::newRow("panel-1000px") << QStringLiteral("settings-panel.html") << 1000 << 35;
+    QTest::newRow("panel-520px") << QStringLiteral("settings-panel.html") << 520 << 35;
+    QTest::newRow("panel-320px") << QStringLiteral("settings-panel.html") << 320 << 35;
   }
 
   void browserFixtures() {

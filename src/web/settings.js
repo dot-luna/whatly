@@ -5,15 +5,21 @@
     const root = document.documentElement;
     const content = document.getElementById("settings-content");
     const sectionsHost = document.getElementById("settings-sections");
+    const categoryTabs = document.getElementById("category-tabs");
+    const categorySelect = document.getElementById("category-select");
     const search = document.getElementById("settings-search");
     const clearSearch = document.getElementById("clear-search");
     const searchSummary = document.getElementById("search-summary");
     const feedback = document.getElementById("feedback");
     const sectionNodes = new Map();
     const controlNodes = new Map();
+    const categoryScroll = new Map();
     let bridge;
     let mutationQueue = Promise.resolve();
     let nextDomId = 0;
+    let activeCategory = null;
+    let categoryBeforeSearch = null;
+    let searching = false;
 
     const asText = value => value == null ? "" : String(value);
 
@@ -22,6 +28,41 @@
         if (className) node.className = className;
         if (text !== undefined) node.textContent = asText(text);
         return node;
+    }
+
+    function categoryDescription(definition) {
+        if (definition.description) return asText(definition.description);
+        const descriptions = {
+            "basics": "Language, downloads and linked device details.",
+            "general": "Startup, audio and everyday app behavior.",
+            "appearance": "Make the colors, fonts and interface your own.",
+            "notifications": "Choose when and how you hear about new messages.",
+            "chatting": "Spelling, media and the way you send messages.",
+            "privacy & lock": "Keep your conversations and your screen private.",
+            "window & zoom": "Adjust the window, tray and interface size.",
+            "ai & translation": "Configure your assistant and inline translations.",
+            "storage": "Manage the files and data saved on this device.",
+            "performance": "Adjust how the app uses your device's resources.",
+            "network & startup": "Connection settings and startup behavior.",
+            "custom javascript addons": "Manage your own additions to WhatsApp.",
+            "saved replies": "Keep frequently used messages ready to send.",
+            "keyboard shortcuts": "Choose keys for your everyday actions.",
+            "cloud api": "Configure sending through the WhatsApp Cloud API.",
+            "local api & cloud webhooks": "Connect your app with local tools and webhooks.",
+            "advanced": "Browser compatibility and additional app controls."
+        };
+        const title = asText(definition.title).replace(/\s*\([^)]*\)/g, "").trim().toLocaleLowerCase();
+        return descriptions[title] || "";
+    }
+
+    function selectCategory(key, focus = false) {
+        const section = sectionNodes.get(key);
+        if (!section || section.tab.hidden) return;
+        if (!searching && activeCategory) categoryScroll.set(activeCategory, content.scrollTop);
+        activeCategory = key;
+        filterSettings();
+        content.scrollTop = searching ? 0 : categoryScroll.get(key) || 0;
+        if (focus) section.tab.focus();
     }
 
     function showError(message) {
@@ -333,21 +374,57 @@
 
     function filterSettings() {
         const words = search.value.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
-        let visible = 0;
-        for (const section of sectionNodes.values()) {
-            let sectionVisible = 0;
-            for (const state of section.controls) {
-                const matches = words.every(word => state.searchText.includes(word));
-                state.row.hidden = !matches;
-                if (matches) sectionVisible++;
-            }
-            section.node.hidden = sectionVisible === 0;
-            visible += sectionVisible;
+        const isSearch = words.length > 0;
+        const wasSearching = searching;
+        const previousCategory = activeCategory;
+        if (isSearch && !searching) {
+            categoryBeforeSearch = activeCategory;
+            categoryScroll.set(activeCategory, content.scrollTop);
+        } else if (!isSearch && searching && sectionNodes.has(categoryBeforeSearch)) {
+            activeCategory = categoryBeforeSearch;
         }
-        clearSearch.hidden = words.length === 0;
-        searchSummary.hidden = words.length === 0;
-        searchSummary.textContent = `${visible} ${visible === 1 ? "setting" : "settings"} found`;
-        document.getElementById("no-results").hidden = visible !== 0 || words.length === 0;
+        searching = isSearch;
+        let matches = 0;
+        const matchingCategories = [];
+        for (const [key, section] of sectionNodes) {
+            section.matches = 0;
+            for (const state of section.controls) {
+                state.matches = words.every(word => state.searchText.includes(word));
+                if (state.matches) section.matches++;
+            }
+            if (section.matches) matchingCategories.push(key);
+            matches += section.matches;
+        }
+
+        // Search spans every category, but only one category's form is shown.
+        if (!matchingCategories.includes(activeCategory)) {
+            activeCategory = matchingCategories[0] || activeCategory;
+        }
+        for (const [key, section] of sectionNodes) {
+            const selected = key === activeCategory && section.matches > 0;
+            section.node.hidden = !selected;
+            section.tab.hidden = section.matches === 0;
+            section.tab.setAttribute("aria-selected", selected ? "true" : "false");
+            section.tab.tabIndex = selected ? 0 : -1;
+            section.count.hidden = !searching;
+            section.count.textContent = section.matches;
+            section.tab.setAttribute("aria-label", searching
+                ? `${section.title}, ${section.matches} ${section.matches === 1 ? "match" : "matches"}`
+                : section.title);
+            section.option.textContent = searching ? `${section.title} (${section.matches})` : section.title;
+            section.option.hidden = section.matches === 0;
+            section.option.disabled = section.matches === 0;
+            for (const state of section.controls) state.row.hidden = !selected || !state.matches;
+        }
+        categorySelect.disabled = matchingCategories.length === 0;
+        categorySelect.value = matchingCategories.length ? activeCategory : "";
+        clearSearch.hidden = !searching;
+        searchSummary.hidden = !searching;
+        searchSummary.textContent = `${matches} ${matches === 1 ? "match" : "matches"} in ${matchingCategories.length} ${matchingCategories.length === 1 ? "category" : "categories"}`;
+        document.getElementById("no-results").hidden = matches !== 0 || !searching;
+        if (previousCategory !== activeCategory || (wasSearching && !searching)) {
+            content.scrollTop = searching ? 0 : categoryScroll.get(activeCategory) || 0;
+        }
     }
 
     function render(snapshot) {
@@ -358,6 +435,7 @@
             return;
         }
         const scrollTop = content.scrollTop;
+        const previousCategory = activeCategory;
         const presentSections = new Set();
         const presentControls = new Set();
         document.getElementById("panel-title").textContent = snapshot.title || "Whatly Settings";
@@ -368,15 +446,39 @@
             let section = sectionNodes.get(key);
             if (!section) {
                 const node = element("section", "settings-section");
+                node.id = `category-panel-${++nextDomId}`;
+                node.dataset.categoryId = key;
+                node.setAttribute("role", "tabpanel");
+                node.tabIndex = 0;
+                const header = element("div", "section-header");
                 const heading = element("h2", "section-heading");
-                heading.id = `section-${++nextDomId}`;
-                node.setAttribute("aria-labelledby", heading.id);
+                const description = element("p", "section-description");
+                header.append(heading, description);
                 const rows = element("div", "section-controls");
-                node.append(heading, rows);
-                section = { node, heading, rows, controls: [] };
+                node.append(header, rows);
+                const tab = element("button", "category-tab");
+                tab.id = `category-tab-${nextDomId}`;
+                tab.dataset.categoryId = key;
+                tab.type = "button";
+                tab.setAttribute("role", "tab");
+                tab.setAttribute("aria-controls", node.id);
+                node.setAttribute("aria-labelledby", tab.id);
+                const name = element("span", "category-name");
+                const count = element("span", "category-count");
+                count.setAttribute("aria-hidden", "true");
+                tab.append(name, count);
+                tab.addEventListener("click", () => selectCategory(key));
+                const option = element("option");
+                option.value = key;
+                section = { node, heading, description, rows, tab, name, count, option, controls: [] };
                 sectionNodes.set(key, section);
             }
-            section.heading.textContent = asText(definition.title);
+            section.title = asText(definition.title);
+            section.heading.textContent = section.title;
+            section.name.textContent = section.title.replace(/\s*\([^)]*\)/g, "").trim();
+            section.tab.title = section.title;
+            section.description.textContent = categoryDescription(definition);
+            section.description.hidden = !section.description.textContent;
             section.controls = [];
             (definition.controls || []).forEach((control, controlIndex) => {
                 presentControls.add(control.id);
@@ -399,6 +501,10 @@
             if (sectionsHost.children[index] !== section.node) {
                 sectionsHost.insertBefore(section.node, sectionsHost.children[index] || null);
             }
+            if (categoryTabs.children[index] !== section.tab) {
+                categoryTabs.insertBefore(section.tab, categoryTabs.children[index] || null);
+                categorySelect.insertBefore(section.option, categorySelect.children[index] || null);
+            }
         });
         for (const [key, state] of controlNodes) {
             if (!presentControls.has(key)) {
@@ -409,13 +515,16 @@
         for (const [key, section] of sectionNodes) {
             if (!presentSections.has(key)) {
                 section.node.remove();
+                section.tab.remove();
+                section.option.remove();
                 sectionNodes.delete(key);
+                categoryScroll.delete(key);
             }
         }
         document.getElementById("loading-settings").hidden = true;
         content.setAttribute("aria-busy", "false");
         filterSettings();
-        content.scrollTop = scrollTop;
+        if (previousCategory === activeCategory) content.scrollTop = scrollTop;
     }
 
     function close() {
@@ -436,7 +545,24 @@
 
     document.getElementById("close-settings").addEventListener("click", close);
     document.getElementById("dismiss-feedback").addEventListener("click", () => { feedback.hidden = true; });
-    search.addEventListener("input", filterSettings);
+    search.addEventListener("input", () => {
+        filterSettings();
+        if (searching) content.scrollTop = 0;
+    });
+    categorySelect.addEventListener("change", () => selectCategory(categorySelect.value));
+    categoryTabs.addEventListener("keydown", event => {
+        const tabs = Array.from(categoryTabs.querySelectorAll('[role="tab"]')).filter(tab => !tab.hidden);
+        const index = tabs.indexOf(document.activeElement);
+        if (index < 0) return;
+        let next;
+        if (event.key === "ArrowDown") next = (index + 1) % tabs.length;
+        else if (event.key === "ArrowUp") next = (index - 1 + tabs.length) % tabs.length;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        selectCategory(tabs[next].dataset.categoryId, true);
+    });
     clearSearch.addEventListener("click", () => {
         search.value = "";
         filterSettings();
