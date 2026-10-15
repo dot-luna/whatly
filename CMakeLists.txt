@@ -549,6 +549,10 @@ install(FILES LICENSE
 )
 
 # Install icons
+# A distinct name prevents existing Whatly PNGs from overriding the WhatsApp logo.
+install(FILES dist/linux/hicolor/scalable/apps/dot-luna-whatsapp.svg
+    DESTINATION ${DATADIR}/icons/hicolor/scalable/apps
+)
 install(FILES dist/linux/hicolor/16x16/apps/net.shakaran.whatly.png
     DESTINATION ${DATADIR}/icons/hicolor/16x16/apps
 )

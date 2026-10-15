@@ -1,10 +1,10 @@
 [Desktop Entry]
-Name=Whatly
+Name=WhatsApp
 GenericName[it]=Client Qt per WhatsApp Web
 GenericName=Qt WhatsApp Web Client
 Comment[it]=Un Client per WhatsApp Web basato su Qt
 Comment=A WhatsApp Web Client using the Qt framework
-Icon=net.shakaran.whatly
+Icon=dot-luna-whatsapp
 Exec=whatly %u
 Terminal=false
 Type=Application
